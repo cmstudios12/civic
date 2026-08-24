@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#f6f8f6" />
+  <title>CM Civic — Ward Councillor Portal</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIINfQ3yn5Z2v3J9+3ie7gzbQZpmT10nEqQ="
+    crossorigin=""/>
+
+  <style>
+    :root{
+      --bg:#f4f7f5;
+      --surface:#fff;
+      --surface-2:#eef3f0;
+      --ink:#102018;
+      --muted:#6c7971;
+      --line:#dae3dd;
+      --brand:#0f6a42;
+      --brand-dark:#0a4e31;
+      --brand-soft:#e6f4ec;
+      --danger:#b42318;
+      --danger-soft:#feeceb;
+      --warning:#946200;
+      --warning-soft:#fff3d6;
+      --info:#175cd3;
+      --info-soft:#eaf2ff;
+      --shadow:0 18px 50px rgba(16,32,24,.07);
+      --radius:20px;
+      --sidebar:270px;
+      --topbar:72px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;background:var(--bg);color:var(--ink);
+      font-family:Manrope,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .hidden{display:none!important}
+    img{max-width:100%;display:block}
+    h1,h2,h3,p{margin-top:0}
+
+    .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.4px}
+    .brand-mark{width:40px;height:40px;border-radius:13px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800}
+
+    .auth{
+      min-height:100dvh;
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      background:#fff;
+    }
+    .auth-side{
+      padding:42px;
+      border-right:1px solid var(--line);
+      background:linear-gradient(180deg,#fff 0,#eef7f1 100%);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .auth-side h1{font-size:clamp(46px,5.5vw,76px);line-height:.98;letter-spacing:-3px;max-width:780px;margin:34px 0 18px}
+    .auth-side p{max-width:650px;color:var(--muted);font-size:15px;line-height:1.7}
+    .auth-points{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:30px}
+    .auth-point{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px}
+    .auth-point strong{display:block;font-size:13px;margin:12px 0 4px}
+    .auth-point span{font-size:10px;color:var(--muted);line-height:1.5}
+
+    .auth-panel{display:grid;place-items:center;padding:28px}
+    .auth-card{width:min(430px,100%)}
+    .auth-card h2{font-size:33px;letter-spacing:-1.4px;margin:18px 0 7px}
+    .auth-card p{color:var(--muted);font-size:12px;line-height:1.6}
+
+    .field{margin-bottom:15px}
+    label{display:block;font-size:11px;font-weight:800;margin-bottom:7px}
+    input,select,textarea{
+      width:100%;border:1px solid #ccd7d0;border-radius:14px;background:#fff;
+      color:var(--ink);padding:13px 14px;outline:none;font-size:16px;
+    }
+    textarea{min-height:110px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+
+    .btn{
+      border:none;border-radius:14px;min-height:44px;padding:11px 15px;font-weight:800;
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.16s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-primary:hover{background:var(--brand-dark)}
+    .btn-secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+    .btn-danger{background:var(--danger-soft);color:var(--danger)}
+    .btn-warning{background:var(--warning-soft);color:var(--warning)}
+    .btn-info{background:var(--info-soft);color:var(--info)}
+    .wide{width:100%}
+
+    .notice{padding:12px 14px;border-radius:13px;background:var(--info-soft);color:#1849a9;font-size:11px;line-height:1.5;margin:12px 0}
+    .notice.error{background:var(--danger-soft);color:var(--danger)}
+    .notice.success{background:var(--brand-soft);color:var(--brand-dark)}
+
+    .sidebar{
+      position:fixed;top:0;left:0;bottom:0;width:var(--sidebar);
+      background:#fff;border-right:1px solid var(--line);z-index:40;
+      display:flex;flex-direction:column;
+    }
+    .sidebar-head{height:var(--topbar);display:flex;align-items:center;padding:0 17px;border-bottom:1px solid var(--line)}
+    .sidebar-body{padding:16px 12px;overflow:auto;flex:1}
+    .nav-label{font-size:9px;text-transform:uppercase;letter-spacing:.7px;color:#8a9690;font-weight:800;padding:0 10px 7px;margin-top:10px}
+    .nav-btn{
+      width:100%;border:none;background:transparent;border-radius:12px;padding:11px 12px;
+      display:flex;align-items:center;gap:10px;color:#5f6d65;font-size:12px;font-weight:700;text-align:left;margin-bottom:3px;
+    }
+    .nav-btn:hover{background:var(--surface-2);color:var(--ink)}
+    .nav-btn.active{background:var(--brand-soft);color:var(--brand-dark)}
+    .nav-count{margin-left:auto;min-width:23px;height:23px;border-radius:999px;background:var(--surface-2);display:grid;place-items:center;font-size:9px;font-weight:800}
+    .sidebar-foot{padding:12px;border-top:1px solid var(--line)}
+    .user-mini{display:grid;grid-template-columns:38px 1fr auto;gap:9px;align-items:center;background:var(--surface-2);padding:9px;border-radius:14px}
+    .avatar{width:38px;height:38px;border-radius:11px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}
+    .user-mini strong{display:block;font-size:11px}
+    .user-mini span{font-size:9px;color:var(--muted)}
+
+    .topbar{
+      position:fixed;top:0;left:var(--sidebar);right:0;height:var(--topbar);
+      background:rgba(255,255,255,.97);border-bottom:1px solid var(--line);z-index:30;
+      display:flex;align-items:center;justify-content:space-between;padding:0 22px;
+      backdrop-filter:blur(9px) saturate(140%);
+    }
+    .topbar-left{display:flex;align-items:center;gap:10px}
+    .top-title{font-size:17px;font-weight:800;letter-spacing:-.4px}
+    .top-actions{display:flex;gap:8px;align-items:center}
+    .icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:#fff;display:grid;place-items:center}
+    .ward-pill{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;background:var(--brand-soft);color:var(--brand-dark);font-size:10px;font-weight:800}
+
+    .main{margin-left:var(--sidebar);padding-top:var(--topbar);min-height:100dvh}
+    .main-inner{width:min(1450px,100%);margin:0 auto;padding:22px}
+    .section{display:none}
+    .section.active{display:block}
+    .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:17px}
+    .section-head h1{font-size:31px;letter-spacing:-1.2px;margin:0 0 5px}
+    .section-head p{font-size:12px;color:var(--muted);margin:0;line-height:1.5}
+
+    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:14px}
+    .stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 8px 24px rgba(16,32,24,.035)}
+    .stat span{font-size:10px;color:var(--muted);font-weight:700}
+    .stat strong{display:block;font-size:27px;letter-spacing:-1px;margin-top:13px}
+
+    .grid-2{display:grid;grid-template-columns:1.35fr .65fr;gap:14px}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:19px;box-shadow:0 8px 24px rgba(16,32,24,.035);overflow:hidden}
+    .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 17px;border-bottom:1px solid var(--line)}
+    .panel-head h2{font-size:14px;margin:0;letter-spacing:-.3px}
+    .panel-body{padding:15px 17px}
+    .panel-body.flush{padding:0}
+
+    .toolbar{display:grid;grid-template-columns:1fr 170px 170px auto;gap:9px;margin-bottom:13px}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff}
+    table{width:100%;border-collapse:collapse;min-width:850px}
+    th,td{padding:12px 13px;border-bottom:1px solid var(--line);text-align:left;font-size:11px;vertical-align:middle}
+    th{background:#fafbfa;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.45px;font-weight:800}
+    .cell-title{font-weight:800;font-size:11px}
+    .cell-sub{font-size:9px;color:var(--muted);margin-top:3px}
+
+    .status,.priority{
+      display:inline-flex;padding:6px 8px;border-radius:999px;font-size:8px;font-weight:900;
+      text-transform:uppercase;letter-spacing:.35px;white-space:nowrap;
+    }
+    .s-submitted,.s-under_review{background:var(--warning-soft);color:var(--warning)}
+    .s-verified,.s-assigned,.s-in_progress{background:var(--info-soft);color:var(--info)}
+    .s-resolved,.s-community_confirmed{background:var(--brand-soft);color:var(--brand-dark)}
+    .s-disputed,.s-invalid{background:var(--danger-soft);color:var(--danger)}
+    .s-duplicate,.s-outside_service_area{background:var(--surface-2);color:var(--muted)}
+    .p-critical{background:var(--danger-soft);color:var(--danger)}
+    .p-high{background:#fff0e6;color:#c2410c}
+    .p-normal{background:var(--info-soft);color:var(--info)}
+    .p-low{background:var(--surface-2);color:var(--muted)}
+
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px}
+    .card h3{font-size:13px;margin:0 0 4px}
+    .card p{font-size:10px;color:var(--muted);line-height:1.5;margin:0 0 13px}
+    .meta-row{display:flex;gap:6px;flex-wrap:wrap}
+    .meta{font-size:8px;font-weight:800;color:var(--muted);padding:6px 8px;border-radius:999px;background:var(--surface-2)}
+
+    .activity{display:grid}
+    .activity-item{display:grid;grid-template-columns:34px 1fr auto;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);align-items:start}
+    .activity-item:last-child{border-bottom:0}
+    .act-icon{width:34px;height:34px;border-radius:11px;background:var(--surface-2);color:var(--brand);display:grid;place-items:center;font-weight:800}
+    .activity-item strong{font-size:10px;display:block;margin-bottom:2px}
+    .activity-item p{font-size:9px;color:var(--muted);margin:0;line-height:1.45}
+    .activity-item time{font-size:8px;color:#909a94;white-space:nowrap}
+
+    #wardMap{height:620px}
+    .map-panel{overflow:hidden}
+
+    .bar-list{display:grid;gap:11px}
+    .bar-label{display:flex;justify-content:space-between;font-size:10px;font-weight:700;margin-bottom:5px}
+    .bar-track{height:9px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+    .bar-fill{height:100%;background:var(--brand);border-radius:inherit}
+
+    .empty{padding:38px 16px;text-align:center;color:var(--muted);font-size:10px}
+    .empty strong{display:block;color:var(--ink);font-size:12px;margin-bottom:4px}
+
+    .modal{position:fixed;inset:0;z-index:100;background:rgba(8,16,12,.52);display:grid;place-items:center;padding:22px}
+    .modal-card{width:min(980px,100%);max-height:92dvh;overflow:auto;background:#fff;border-radius:24px;box-shadow:var(--shadow)}
+    .modal-head{position:sticky;top:0;z-index:3;background:#fff;padding:17px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .modal-head h2{font-size:23px;letter-spacing:-.8px;margin:8px 0 4px}
+    .modal-body{padding:17px 19px}
+    .detail-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:13px}
+    .stack{display:grid;gap:13px}
+    .detail-card{border:1px solid var(--line);border-radius:17px;padding:15px}
+    .detail-card h3{font-size:13px;margin:0 0 11px}
+    .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+    .photo-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;border:1px solid var(--line)}
+    .timeline{position:relative;padding-left:20px}
+    .timeline:before{content:"";position:absolute;left:6px;top:4px;bottom:8px;width:2px;background:var(--line)}
+    .timeline-item{position:relative;padding:0 0 15px 13px}
+    .timeline-item:before{content:"";position:absolute;width:11px;height:11px;border-radius:50%;background:var(--brand);left:-19px;top:3px;border:3px solid #fff;box-shadow:0 0 0 1px var(--brand)}
+    .timeline-item strong{display:block;font-size:10px}
+    .timeline-item span{font-size:9px;color:var(--muted)}
+
+    .loader{width:17px;height:17px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);width:min(calc(100% - 30px),430px);padding:12px 14px;background:#101914;color:#fff;border-radius:13px;font-size:10px;font-weight:800;opacity:0;transition:.25s ease;z-index:999}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .mobile-menu{display:none}
+
+    @media(max-width:1100px){
+      :root{--sidebar:235px}
+      .stats{grid-template-columns:repeat(3,1fr)}
+      .grid-2{grid-template-columns:1fr}
+      .cards{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:850px){
+      :root{--sidebar:0px}
+      .sidebar{width:280px;transform:translateX(-100%);transition:.24s ease;box-shadow:var(--shadow)}
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0;padding:0 13px}
+      .mobile-menu{display:grid}
+      .main{margin-left:0}
+      .main-inner{padding:15px}
+      .auth{grid-template-columns:1fr}
+      .auth-side{display:none}
+      .auth-panel{min-height:100dvh}
+      .toolbar{grid-template-columns:1fr}
+      .cards{grid-template-columns:1fr}
+      .detail-grid{grid-template-columns:1fr}
+      #wardMap{height:500px}
+    }
+    @media(max-width:520px){
+      .stats{grid-template-columns:1fr 1fr}
+      .section-head{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<section id="authView" class="auth">
+  <div class="auth-side">
+    <div>
+      <div class="brand"><div class="brand-mark">CM</div><div>CM Civic Councillor Portal</div></div>
+      <h1>Know what is happening in your ward.</h1>
+      <p>One place for ward service reports, community pressure points, escalations, announcements and transparent progress tracking.</p>
+      <div class="auth-points">
+        <div class="auth-point"><div class="brand-mark" style="width:34px;height:34px">01</div><strong>Ward-scoped access</strong><span>Councillors see only the ward assigned to their account.</span></div>
+        <div class="auth-point"><div class="brand-mark" style="width:34px;height:34px">02</div><strong>Escalate issues</strong><span>Raise long-running or critical reports to the CM Civic Command Centre.</span></div>
+        <div class="auth-point"><div class="brand-mark" style="width:34px;height:34px">03</div><strong>Community updates</strong><span>Publish ward notices and status information for residents.</span></div>
+      </div>
+    </div>
+    <p style="font-size:10px;margin:0">CM Civic is an independent platform. Access does not imply official municipal endorsement unless formally integrated.</p>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <div class="brand"><div class="brand-mark">CM</div><div>Ward Portal</div></div>
+      <h2>Councillor sign in</h2>
+      <p>Use the account assigned to your CM Civic ward councillor profile.</p>
+      <div id="authNotice" class="notice hidden"></div>
+      <form id="loginForm">
+        <div class="field"><label>Email address</label><input id="email" type="email" required autocomplete="email" placeholder="councillor@example.com"></div>
+        <div class="field"><label>Password</label><input id="password" type="password" required autocomplete="current-password" placeholder="Your password"></div>
+        <button id="loginBtn" class="btn btn-primary wide" type="submit">Sign in</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section id="appView" class="hidden">
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-head"><div class="brand"><div class="brand-mark">CM</div><div>CM Civic</div></div></div>
+    <div class="sidebar-body">
+      <div class="nav-label">Ward operations</div>
+      <button class="nav-btn active" data-section="dashboardSection" data-title="Ward Overview">Overview</button>
+      <button class="nav-btn" data-section="reportsSection" data-title="Ward Reports">Reports <span id="navReportsCount" class="nav-count">0</span></button>
+      <button class="nav-btn" data-section="mapSection" data-title="Ward Issue Map">Live Map</button>
+      <button class="nav-btn" data-section="criticalSection" data-title="Critical Issues">Critical Issues <span id="navCriticalCount" class="nav-count">0</span></button>
+      <button class="nav-btn" data-section="escalationsSection" data-title="Escalations">Escalations <span id="navEscalationsCount" class="nav-count">0</span></button>
+
+      <div class="nav-label">Community</div>
+      <button class="nav-btn" data-section="announcementsSection" data-title="Ward Announcements">Announcements</button>
+      <button class="nav-btn" data-section="analyticsSection" data-title="Ward Analytics">Analytics</button>
+      <button class="nav-btn" data-section="profileSection" data-title="Profile">Profile</button>
+    </div>
+    <div class="sidebar-foot">
+      <div class="user-mini">
+        <div id="sidebarAvatar" class="avatar">WC</div>
+        <div><strong id="sidebarName">Councillor</strong><span id="sidebarWard">Ward</span></div>
+        <button id="logoutBtn" class="icon-btn">→</button>
+      </div>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button id="mobileMenuBtn" class="icon-btn mobile-menu">☰</button>
+      <div id="topTitle" class="top-title">Ward Overview</div>
+    </div>
+    <div class="top-actions">
+      <span id="topWardPill" class="ward-pill">Ward —</span>
+      <button id="refreshBtn" class="icon-btn">↻</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="main-inner">
+
+      <section id="dashboardSection" class="section active">
+        <div class="section-head">
+          <div>
+            <span id="dashboardWardEyebrow" class="ward-pill">Ward —</span>
+            <h1 style="margin-top:10px">Ward overview</h1>
+            <p>Current service demand, unresolved issues and community pressure points.</p>
+          </div>
+          <button class="btn btn-primary" data-jump="reportsSection">Open ward reports</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><span>Total reports</span><strong id="statTotal">0</strong></div>
+          <div class="stat"><span>Open issues</span><strong id="statOpen">0</strong></div>
+          <div class="stat"><span>Critical</span><strong id="statCritical">0</strong></div>
+          <div class="stat"><span>Resolved</span><strong id="statResolved">0</strong></div>
+          <div class="stat"><span>Escalated</span><strong id="statEscalated">0</strong></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><h2>Latest ward reports</h2><button class="btn btn-secondary" data-jump="reportsSection">View all</button></div>
+            <div class="panel-body flush">
+              <div class="table-wrap" style="border:0;border-radius:0">
+                <table>
+                  <thead><tr><th>Report</th><th>Category</th><th>Status</th><th>Priority</th><th></th></tr></thead>
+                  <tbody id="dashboardReportRows"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Top issue categories</h2></div>
+            <div class="panel-body"><div id="dashboardCategoryBars" class="bar-list"></div></div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:14px">
+          <div class="panel">
+            <div class="panel-head"><h2>Needs attention</h2></div>
+            <div class="panel-body"><div id="attentionList" class="activity"></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Latest ward updates</h2></div>
+            <div class="panel-body"><div id="announcementActivity" class="activity"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="reportsSection" class="section">
+        <div class="section-head"><div><h1>Ward reports</h1><p>Reports assigned to your ward only.</p></div></div>
+        <div class="toolbar">
+          <input id="reportSearch" type="search" placeholder="Search title, reference or area">
+          <select id="reportStatus"><option value="">All statuses</option><option value="submitted">Submitted</option><option value="under_review">Under review</option><option value="verified">Verified</option><option value="assigned">Assigned</option><option value="in_progress">In progress</option><option value="resolved">Resolved</option><option value="community_confirmed">Community confirmed</option><option value="disputed">Disputed</option></select>
+          <select id="reportPriority"><option value="">All priorities</option><option value="critical">Critical</option><option value="high">High</option><option value="normal">Normal</option><option value="low">Low</option></select>
+          <button class="btn btn-primary" id="reportRefreshBtn">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Report</th><th>Category</th><th>Status</th><th>Priority</th><th>Support</th><th>Area</th><th>Created</th><th></th></tr></thead>
+            <tbody id="reportRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="mapSection" class="section">
+        <div class="section-head"><div><h1>Ward issue map</h1><p>Approximate public locations for reports in your assigned ward.</p></div><button id="fitMapBtn" class="btn btn-secondary">Fit all</button></div>
+        <div class="panel map-panel"><div id="wardMap"></div></div>
+      </section>
+
+      <section id="criticalSection" class="section">
+        <div class="section-head"><div><h1>Critical issues</h1><p>Highest priority issues in your ward.</p></div></div>
+        <div id="criticalCards" class="cards"></div>
+      </section>
+
+      <section id="escalationsSection" class="section">
+        <div class="section-head"><div><h1>Escalations</h1><p>Issues you have escalated to the Command Centre.</p></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Report</th><th>Reason</th><th>Status</th><th>Escalated</th><th>Resolved</th></tr></thead>
+            <tbody id="escalationRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="announcementsSection" class="section">
+        <div class="section-head">
+          <div><h1>Ward announcements</h1><p>Publish updates that can be surfaced to residents in your ward.</p></div>
+          <button id="newAnnouncementBtn" class="btn btn-primary">New announcement</button>
+        </div>
+        <div id="announcementCards" class="cards"></div>
+      </section>
+
+      <section id="analyticsSection" class="section">
+        <div class="section-head"><div><h1>Ward analytics</h1><p>Understand service demand and progress in your ward.</p></div></div>
+        <div class="stats" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat"><span>Resolution rate</span><strong id="analyticsResolution">0%</strong></div>
+          <div class="stat"><span>Average supporters</span><strong id="analyticsSupport">0</strong></div>
+          <div class="stat"><span>Most reported</span><strong id="analyticsTopCategory">—</strong></div>
+          <div class="stat"><span>Critical share</span><strong id="analyticsCriticalShare">0%</strong></div>
+        </div>
+        <div class="grid-2">
+          <div class="panel"><div class="panel-head"><h2>Reports by category</h2></div><div class="panel-body"><div id="analyticsCategoryBars" class="bar-list"></div></div></div>
+          <div class="panel"><div class="panel-head"><h2>Reports by status</h2></div><div class="panel-body"><div id="analyticsStatusBars" class="bar-list"></div></div></div>
+        </div>
+      </section>
+
+      <section id="profileSection" class="section">
+        <div class="section-head"><div><h1>Profile</h1><p>Your ward councillor account and assignment.</p></div></div>
+        <div class="grid-2">
+          <div class="panel"><div class="panel-head"><h2>Account</h2></div><div class="panel-body">
+            <div class="field"><label>Name</label><input id="profileName" disabled></div>
+            <div class="field"><label>Email</label><input id="profileEmail" disabled></div>
+            <div class="field"><label>Ward</label><input id="profileWard" disabled></div>
+          </div></div>
+          <div class="panel"><div class="panel-head"><h2>Access</h2></div><div class="panel-body"><div class="notice">Ward councillor access is restricted to the ward assigned in CM Civic. Reports from other wards are blocked by Row Level Security.</div></div></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</section>
+
+<div id="reportModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div><span id="modalStatus" class="status"></span><h2 id="modalTitle">Report</h2><div id="modalMeta" class="cell-sub"></div></div>
+      <button id="closeReportModal" class="icon-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-grid">
+        <div class="stack">
+          <div class="detail-card"><h3>Description</h3><p id="modalDescription" style="font-size:10px;color:var(--muted);line-height:1.6;margin:0"></p></div>
+          <div class="detail-card"><h3>Evidence</h3><div id="modalPhotos" class="photo-grid"></div></div>
+          <div class="detail-card"><h3>Timeline</h3><div id="modalTimeline" class="timeline"></div></div>
+        </div>
+        <div class="stack">
+          <div class="detail-card">
+            <h3>Councillor action</h3>
+            <div class="field"><label>Acknowledge / status note</label><textarea id="councillorNote" placeholder="Add a short ward-level update or internal note"></textarea></div>
+            <button id="acknowledgeBtn" class="btn btn-info wide">Acknowledge report</button>
+            <button id="escalateBtn" class="btn btn-warning wide" style="margin-top:8px">Escalate to Command Centre</button>
+          </div>
+          <div class="detail-card"><h3>Report facts</h3><div id="modalFacts" style="font-size:10px;color:var(--muted);line-height:1.8"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="announcementModal" class="modal hidden">
+  <div class="modal-card" style="width:min(560px,100%)">
+    <div class="modal-head"><div><h2 style="margin:0">New ward announcement</h2></div><button id="closeAnnouncementModal" class="icon-btn">✕</button></div>
+    <div class="modal-body">
+      <form id="announcementForm">
+        <div class="field"><label>Title</label><input id="announcementTitle" maxlength="120" required placeholder="e.g. Water interruption update"></div>
+        <div class="field"><label>Message</label><textarea id="announcementMessage" maxlength="1500" required placeholder="Share a clear, factual ward update"></textarea></div>
+        <div class="field"><label>Severity</label><select id="announcementSeverity"><option value="info">Information</option><option value="warning">Warning</option><option value="critical">Critical</option></select></div>
+        <button class="btn btn-primary wide" type="submit">Publish announcement</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""></script>
+
+<script>
+(() => {
+  "use strict";
+
+  const SUPABASE_URL = "https://whfqhhdtvftfbwojhasq.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EqPFSmCfv5GHgbDCELgIQw_MgqbQfhk";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+
+  const state = {
+    user:null,
+    profile:null,
+    wardAssignment:null,
+    ward:null,
+    reports:[],
+    escalations:[],
+    announcements:[],
+    selectedReport:null,
+    channel:null,
+    map:null,
+    markers:[],
+    currentSection:"dashboardSection"
+  };
+
+  const $ = id => document.getElementById(id);
+  const $$ = sel => [...document.querySelectorAll(sel)];
+
+  function esc(v=""){return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+  function nice(v=""){return String(v).replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase())}
+  function fmt(d){return d ? new Intl.DateTimeFormat("en-ZA",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(d)) : "—"}
+  function pct(n,d){return d ? Math.round(n/d*100) : 0}
+  function initials(n="WC"){return String(n).trim().split(/\s+/).slice(0,2).map(x=>x[0]?.toUpperCase()).join("") || "WC"}
+  let tt;
+  function toast(m){const el=$("toast");el.textContent=m;el.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("show"),3200)}
+  function notice(m="",type=""){const el=$("authNotice");if(!m){el.className="notice hidden";el.textContent="";return}el.className=`notice ${type}`;el.textContent=m}
+  function loading(btn,on,label){if(on){btn.dataset.old=btn.innerHTML;btn.disabled=true;btn.innerHTML=`<span class="loader"></span>${esc(label||"Working...")}`}else{btn.disabled=false;btn.innerHTML=btn.dataset.old||label||"Continue"}}
+
+  async function boot(){
+    bind();
+    const {data:{session}}=await sb.auth.getSession();
+    if(session?.user) await enter(session.user);
+    else showAuth();
+
+    sb.auth.onAuthStateChange(async(event,session)=>{
+      if(event==="SIGNED_IN" && session?.user) await enter(session.user);
+      if(event==="SIGNED_OUT"){leaveRealtime();showAuth()}
+    });
+  }
+
+  function bind(){
+    $("loginForm").addEventListener("submit",login);
+    $("logoutBtn").addEventListener("click",()=>sb.auth.signOut());
+    $("refreshBtn").addEventListener("click",refreshAll);
+    $("reportRefreshBtn").addEventListener("click",refreshAll);
+    $("mobileMenuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
+    $("fitMapBtn").addEventListener("click",fitMap);
+
+    $$("[data-section]").forEach(btn=>btn.addEventListener("click",()=>switchSection(btn.dataset.section,btn.dataset.title)));
+    $$("[data-jump]").forEach(btn=>btn.addEventListener("click",()=>{
+      const target=btn.dataset.jump;
+      const nav=document.querySelector(`[data-section="${target}"]`);
+      switchSection(target,nav?.dataset.title||"");
+    }));
+
+    ["reportSearch","reportStatus","reportPriority"].forEach(id=>$(id).addEventListener("input",renderReports));
+
+    $("closeReportModal").addEventListener("click",()=>$("reportModal").classList.add("hidden"));
+    $("acknowledgeBtn").addEventListener("click",acknowledgeSelected);
+    $("escalateBtn").addEventListener("click",escalateSelected);
+
+    $("newAnnouncementBtn").addEventListener("click",()=>$("announcementModal").classList.remove("hidden"));
+    $("closeAnnouncementModal").addEventListener("click",()=>$("announcementModal").classList.add("hidden"));
+    $("announcementForm").addEventListener("submit",publishAnnouncement);
+  }
+
+  async function login(e){
+    e.preventDefault();
+    const btn=$("loginBtn");
+    loading(btn,true,"Signing in...");
+    notice();
+    const {error}=await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+    loading(btn,false);
+    if(error) notice(error.message,"error");
+  }
+
+  function showAuth(){
+    $("appView").classList.add("hidden");
+    $("authView").classList.remove("hidden");
+  }
+
+  async function enter(user){
+    state.user=user;
+
+    const [{data:profile},{data:assignment,error:aErr}] = await Promise.all([
+      sb.from("profiles").select("*").eq("id",user.id).maybeSingle(),
+      sb.from("ward_councillors").select("*,wards(*,municipalities(name,code))").eq("user_id",user.id).eq("active",true).maybeSingle()
+    ]);
+
+    if(aErr || !assignment){
+      await sb.auth.signOut();
+      notice("This account is not assigned to an active ward councillor profile.","error");
+      return;
+    }
+
+    state.profile=profile||{};
+    state.wardAssignment=assignment;
+    state.ward=assignment.wards;
+
+    $("authView").classList.add("hidden");
+    $("appView").classList.remove("hidden");
+
+    renderIdentity();
+    await refreshAll();
+    setupRealtime();
+  }
+
+  function renderIdentity(){
+    const name=state.profile?.full_name || state.user?.user_metadata?.full_name || "Ward Councillor";
+    const wardLabel=`Ward ${state.ward?.ward_number ?? "—"}`;
+
+    $("sidebarName").textContent=name;
+    $("sidebarWard").textContent=wardLabel;
+    $("sidebarAvatar").textContent=initials(name);
+    $("topWardPill").textContent=wardLabel;
+    $("dashboardWardEyebrow").textContent=`${wardLabel} • ${state.ward?.municipalities?.name || "City of Mbombela"}`;
+    $("profileName").value=name;
+    $("profileEmail").value=state.user?.email||"";
+    $("profileWard").value=`${wardLabel}${state.ward?.name ? " — "+state.ward.name : ""}`;
+  }
+
+  function switchSection(id,title){
+    state.currentSection=id;
+    $$(".section").forEach(s=>s.classList.toggle("active",s.id===id));
+    $$("[data-section]").forEach(b=>b.classList.toggle("active",b.dataset.section===id));
+    $("topTitle").textContent=title||"Ward Portal";
+    $("sidebar").classList.remove("open");
+    if(id==="mapSection") setTimeout(renderMap,100);
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  async function refreshAll(){
+    await Promise.all([loadReports(),loadEscalations(),loadAnnouncements()]);
+    renderAll();
+    toast("Ward data updated.");
+  }
+
+  async function loadReports(){
+    const {data,error}=await sb.from("reports").select(`
+      *,
+      issue_categories(name,slug),
+      report_images(id,object_path,image_type),
+      report_status_history(id,old_status,new_status,note,created_at)
+    `).eq("ward_id",state.ward.id).order("created_at",{ascending:false}).limit(500);
+
+    if(error){toast(error.message);return}
+    state.reports=data||[];
+  }
+
+  async function loadEscalations(){
+    const {data,error}=await sb.from("ward_escalations").select("*").eq("ward_id",state.ward.id).order("created_at",{ascending:false});
+    if(!error) state.escalations=data||[];
+  }
+
+  async function loadAnnouncements(){
+    const {data,error}=await sb.from("ward_announcements").select("*").eq("ward_id",state.ward.id).order("created_at",{ascending:false});
+    if(!error) state.announcements=data||[];
+  }
+
+  function renderAll(){
+    renderDashboard();
+    renderReports();
+    renderCritical();
+    renderEscalations();
+    renderAnnouncements();
+    renderAnalytics();
+    renderCounts();
+    if(state.currentSection==="mapSection") renderMap();
+  }
+
+  function renderCounts(){
+    $("navReportsCount").textContent=state.reports.length;
+    $("navCriticalCount").textContent=state.reports.filter(r=>r.priority==="critical" && !["resolved","community_confirmed"].includes(r.status)).length;
+    $("navEscalationsCount").textContent=state.escalations.filter(e=>e.status!=="resolved").length;
+  }
+
+  function renderDashboard(){
+    const r=state.reports;
+    const open=r.filter(x=>!["resolved","community_confirmed","invalid","duplicate"].includes(x.status));
+    const critical=r.filter(x=>x.priority==="critical" && !["resolved","community_confirmed"].includes(x.status));
+    const resolved=r.filter(x=>["resolved","community_confirmed"].includes(x.status));
+    const escalated=state.escalations.filter(e=>e.status!=="resolved");
+
+    $("statTotal").textContent=r.length;
+    $("statOpen").textContent=open.length;
+    $("statCritical").textContent=critical.length;
+    $("statResolved").textContent=resolved.length;
+    $("statEscalated").textContent=escalated.length;
+
+    $("dashboardReportRows").innerHTML=r.slice(0,7).map(x=>`
+      <tr>
+        <td><div class="cell-title">${esc(x.title)}</div><div class="cell-sub">${esc(x.reference_number||"")}</div></td>
+        <td>${esc(x.issue_categories?.name||"Issue")}</td>
+        <td><span class="status s-${x.status}">${esc(nice(x.status))}</span></td>
+        <td><span class="priority p-${x.priority}">${esc(nice(x.priority))}</span></td>
+        <td><button class="btn btn-secondary" style="min-height:32px;padding:7px 9px" data-open="${x.id}">Open</button></td>
+      </tr>`).join("") || emptyRow(5,"No ward reports yet.");
+
+    const att=r.filter(x=>x.priority==="critical" || ["submitted","under_review","disputed"].includes(x.status)).slice(0,6);
+    $("attentionList").innerHTML=att.map(x=>`
+      <div class="activity-item">
+        <div class="act-icon">!</div>
+        <div><strong>${esc(x.title)}</strong><p>${esc(x.reference_number||"")} • ${esc(nice(x.status))}</p></div>
+        <button class="btn btn-secondary" style="min-height:32px;padding:7px 9px" data-open="${x.id}">Review</button>
+      </div>`).join("") || `<div class="empty"><strong>Nothing urgent right now</strong></div>`;
+
+    $("announcementActivity").innerHTML=state.announcements.slice(0,5).map(a=>`
+      <div class="activity-item">
+        <div class="act-icon">i</div>
+        <div><strong>${esc(a.title)}</strong><p>${esc(a.message)}</p></div>
+        <time>${fmt(a.created_at)}</time>
+      </div>`).join("") || `<div class="empty"><strong>No ward announcements yet</strong></div>`;
+
+    $("dashboardCategoryBars").innerHTML=bars(countBy(r,x=>x.issue_categories?.name||"Other"),5);
+    wireOpen();
+  }
+
+  function filteredReports(){
+    const q=$("reportSearch").value.trim().toLowerCase();
+    const st=$("reportStatus").value;
+    const pr=$("reportPriority").value;
+    return state.reports.filter(r=>{
+      const blob=`${r.title||""} ${r.reference_number||""} ${r.public_location_label||""} ${r.description||""}`.toLowerCase();
+      return (!q||blob.includes(q)) && (!st||r.status===st) && (!pr||r.priority===pr);
+    });
+  }
+
+  function renderReports(){
+    const rows=filteredReports();
+    $("reportRows").innerHTML=rows.map(r=>`
+      <tr>
+        <td><div class="cell-title">${esc(r.title)}</div><div class="cell-sub">${esc(r.reference_number||"")}</div></td>
+        <td>${esc(r.issue_categories?.name||"Issue")}</td>
+        <td><span class="status s-${r.status}">${esc(nice(r.status))}</span></td>
+        <td><span class="priority p-${r.priority}">${esc(nice(r.priority))}</span></td>
+        <td>${r.support_count||0}</td>
+        <td>${esc(r.public_location_label||"Mbombela")}</td>
+        <td>${fmt(r.created_at)}</td>
+        <td><button class="btn btn-secondary" style="min-height:32px;padding:7px 9px" data-open="${r.id}">Open</button></td>
+      </tr>`).join("") || emptyRow(8,"No reports match these filters.");
+    wireOpen();
+  }
+
+  function renderCritical(){
+    const rows=state.reports.filter(r=>r.priority==="critical" && !["resolved","community_confirmed"].includes(r.status));
+    $("criticalCards").innerHTML=rows.map(r=>`
+      <div class="card">
+        <span class="priority p-critical">Critical</span>
+        <h3 style="margin-top:10px">${esc(r.title)}</h3>
+        <p>${esc(r.description||"No description provided.")}</p>
+        <div class="meta-row"><span class="meta">${esc(r.reference_number||"")}</span><span class="meta">${esc(nice(r.status))}</span><span class="meta">${esc(r.public_location_label||"Mbombela")}</span></div>
+        <button class="btn btn-primary wide" style="margin-top:13px" data-open="${r.id}">Open report</button>
+      </div>`).join("") || `<div class="panel" style="grid-column:1/-1"><div class="empty"><strong>No critical issues</strong></div></div>`;
+    wireOpen();
+  }
+
+  function renderEscalations(){
+    $("escalationRows").innerHTML=state.escalations.map(e=>{
+      const r=state.reports.find(x=>x.id===e.report_id);
+      return `<tr>
+        <td><div class="cell-title">${esc(r?.title||"Report")}</div><div class="cell-sub">${esc(r?.reference_number||e.report_id)}</div></td>
+        <td>${esc(e.reason||"—")}</td>
+        <td><span class="status ${e.status==="resolved"?"s-resolved":"s-under_review"}">${esc(nice(e.status))}</span></td>
+        <td>${fmt(e.created_at)}</td>
+        <td>${fmt(e.resolved_at)}</td>
+      </tr>`;
+    }).join("") || emptyRow(5,"No escalations yet.");
+  }
+
+  function renderAnnouncements(){
+    $("announcementCards").innerHTML=state.announcements.map(a=>`
+      <div class="card">
+        <span class="status ${a.severity==="critical"?"s-invalid":a.severity==="warning"?"s-under_review":"s-verified"}">${esc(nice(a.severity))}</span>
+        <h3 style="margin-top:10px">${esc(a.title)}</h3>
+        <p>${esc(a.message)}</p>
+        <div class="meta-row"><span class="meta">${fmt(a.created_at)}</span><span class="meta">${a.active?"Published":"Hidden"}</span></div>
+      </div>`).join("") || `<div class="panel" style="grid-column:1/-1"><div class="empty"><strong>No announcements yet</strong>Publish updates for residents in your ward.</div></div>`;
+  }
+
+  function renderAnalytics(){
+    const r=state.reports,total=r.length,res=r.filter(x=>["resolved","community_confirmed"].includes(x.status)).length,crit=r.filter(x=>x.priority==="critical").length;
+    const avg=total?(r.reduce((s,x)=>s+(x.support_count||0),0)/total).toFixed(1):"0";
+    const cats=countBy(r,x=>x.issue_categories?.name||"Other");
+    const top=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0]?.[0]||"—";
+    $("analyticsResolution").textContent=`${pct(res,total)}%`;
+    $("analyticsSupport").textContent=avg;
+    $("analyticsTopCategory").textContent=top;
+    $("analyticsCriticalShare").textContent=`${pct(crit,total)}%`;
+    $("analyticsCategoryBars").innerHTML=bars(cats,20);
+    $("analyticsStatusBars").innerHTML=bars(countBy(r,x=>nice(x.status)),20);
+  }
+
+  function countBy(arr,fn){return arr.reduce((a,x)=>{const k=fn(x);a[k]=(a[k]||0)+1;return a},{})}
+  function bars(counts,limit=10){
+    const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,limit),max=entries[0]?.[1]||1;
+    return entries.map(([k,v])=>`<div><div class="bar-label"><span>${esc(k)}</span><strong>${v}</strong></div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%"></div></div></div>`).join("") || `<div class="empty"><strong>No data yet</strong></div>`;
+  }
+  function emptyRow(cols,msg){return `<tr><td colspan="${cols}"><div class="empty"><strong>${esc(msg)}</strong></div></td></tr>`}
+
+  function wireOpen(){
+    $$("[data-open]").forEach(btn=>btn.onclick=()=>openReport(btn.dataset.open));
+  }
+
+  async function signed(path){
+    const {data,error}=await sb.storage.from("report-images").createSignedUrl(path,60*15);
+    return error?null:data.signedUrl;
+  }
+
+  async function openReport(id){
+    const r=state.reports.find(x=>x.id===id);
+    if(!r)return;
+    state.selectedReport=r;
+    $("modalStatus").className=`status s-${r.status}`;
+    $("modalStatus").textContent=nice(r.status);
+    $("modalTitle").textContent=r.title;
+    $("modalMeta").textContent=`${r.reference_number||""} • ${r.issue_categories?.name||"Issue"} • ${fmt(r.created_at)}`;
+    $("modalDescription").textContent=r.description||"No additional description.";
+    $("modalFacts").innerHTML=`<strong>Area:</strong> ${esc(r.public_location_label||"Mbombela")}<br><strong>Priority:</strong> ${esc(nice(r.priority))}<br><strong>Supporters:</strong> ${r.support_count||0}<br><strong>Status:</strong> ${esc(nice(r.status))}<br><strong>Ward:</strong> Ward ${state.ward.ward_number}`;
+    $("councillorNote").value="";
+
+    const hist=[...(r.report_status_history||[])].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+    $("modalTimeline").innerHTML=hist.map(h=>`<div class="timeline-item"><strong>${esc(nice(h.new_status))}</strong><span>${esc(h.note||"Status updated")} • ${fmt(h.created_at)}</span></div>`).join("")||`<div class="empty"><strong>No timeline yet</strong></div>`;
+
+    const imgs=r.report_images||[];
+    if(!imgs.length) $("modalPhotos").innerHTML=`<div class="empty" style="grid-column:1/-1"><strong>No evidence photos</strong></div>`;
+    else{
+      $("modalPhotos").innerHTML=`<div class="empty" style="grid-column:1/-1"><strong>Loading photos...</strong></div>`;
+      const urls=await Promise.all(imgs.map(i=>signed(i.object_path)));
+      $("modalPhotos").innerHTML=urls.filter(Boolean).map(u=>`<img src="${u}" alt="Evidence">`).join("")||`<div class="empty" style="grid-column:1/-1"><strong>Photos unavailable</strong></div>`;
+    }
+
+    const existing=state.escalations.find(e=>e.report_id===r.id && e.status!=="resolved");
+    $("escalateBtn").disabled=!!existing;
+    $("escalateBtn").textContent=existing?"Already escalated":"Escalate to Command Centre";
+    $("reportModal").classList.remove("hidden");
+  }
+
+  async function acknowledgeSelected(){
+    const r=state.selectedReport;if(!r)return;
+    const note=$("councillorNote").value.trim()||"Ward councillor acknowledged this report.";
+    const btn=$("acknowledgeBtn");loading(btn,true,"Saving...");
+    const {error}=await sb.from("ward_report_notes").insert({report_id:r.id,ward_id:state.ward.id,councillor_user_id:state.user.id,note,note_type:"acknowledgement"});
+    loading(btn,false);
+    if(error)return toast(error.message);
+    toast("Report acknowledged.");
+    await refreshAll();
+  }
+
+  async function escalateSelected(){
+    const r=state.selectedReport;if(!r)return;
+    const reason=$("councillorNote").value.trim()||"Escalated by ward councillor for further attention.";
+    const btn=$("escalateBtn");loading(btn,true,"Escalating...");
+    const {error}=await sb.from("ward_escalations").insert({report_id:r.id,ward_id:state.ward.id,councillor_user_id:state.user.id,reason,status:"open"});
+    loading(btn,false);
+    if(error)return toast(error.message);
+    toast("Report escalated to the Command Centre.");
+    $("reportModal").classList.add("hidden");
+    await refreshAll();
+  }
+
+  async function publishAnnouncement(e){
+    e.preventDefault();
+    const {error}=await sb.from("ward_announcements").insert({
+      ward_id:state.ward.id,
+      councillor_user_id:state.user.id,
+      title:$("announcementTitle").value.trim(),
+      message:$("announcementMessage").value.trim(),
+      severity:$("announcementSeverity").value,
+      active:true
+    });
+    if(error)return toast(error.message);
+    toast("Ward announcement published.");
+    $("announcementForm").reset();
+    $("announcementModal").classList.add("hidden");
+    await refreshAll();
+  }
+
+  function renderMap(){
+    if(typeof L==="undefined")return;
+    if(!state.map){
+      state.map=L.map("wardMap").setView([-25.4753,30.9694],12);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors"}).addTo(state.map);
+    }
+    state.markers.forEach(m=>m.remove());state.markers=[];
+    state.reports.filter(r=>Number.isFinite(r.public_latitude)&&Number.isFinite(r.public_longitude)).forEach(r=>{
+      const m=L.circleMarker([r.public_latitude,r.public_longitude],{radius:r.priority==="critical"?10:8,weight:2,fillOpacity:.75}).addTo(state.map);
+      m.bindPopup(`<div style="font-family:Manrope,sans-serif;min-width:200px"><strong>${esc(r.title)}</strong><div style="font-size:10px;margin-top:4px;color:#6c7971">${esc(r.reference_number||"")} • ${esc(nice(r.status))}</div></div>`);
+      state.markers.push(m);
+    });
+    setTimeout(()=>state.map.invalidateSize(),100);
+  }
+
+  function fitMap(){
+    if(!state.map||!state.markers.length)return;
+    state.map.fitBounds(L.featureGroup(state.markers).getBounds().pad(.15));
+  }
+
+  function setupRealtime(){
+    leaveRealtime();
+    state.channel=sb.channel(`ward-${state.ward.id}`)
+      .on("postgres_changes",{event:"*",schema:"public",table:"reports",filter:`ward_id=eq.${state.ward.id}`},async()=>{await loadReports();renderAll()})
+      .on("postgres_changes",{event:"*",schema:"public",table:"ward_escalations",filter:`ward_id=eq.${state.ward.id}`},async()=>{await loadEscalations();renderAll()})
+      .on("postgres_changes",{event:"*",schema:"public",table:"ward_announcements",filter:`ward_id=eq.${state.ward.id}`},async()=>{await loadAnnouncements();renderAll()})
+      .subscribe();
+  }
+  function leaveRealtime(){if(state.channel){sb.removeChannel(state.channel);state.channel=null}}
+
+  boot();
+})();
+</script>
+</body>
+</html>
