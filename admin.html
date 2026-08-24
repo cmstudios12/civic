@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#f7f8f6" />
+  <title>CM Civic — Administration & Operations</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIINfQ3yn5Z2v3J9+3ie7gzbQZpmT10nEqQ="
+    crossorigin=""/>
+
+  <style>
+    :root{
+      --bg:#f5f7f6;
+      --surface:#ffffff;
+      --surface-2:#f0f3f1;
+      --surface-3:#e9eeeb;
+      --ink:#132019;
+      --muted:#6f7d75;
+      --muted-2:#8d9892;
+      --line:#dce4df;
+      --line-strong:#cdd8d1;
+      --brand:#0f6a42;
+      --brand-dark:#0a4f31;
+      --brand-soft:#e6f4ec;
+      --danger:#b42318;
+      --danger-soft:#feeceb;
+      --warning:#9a6700;
+      --warning-soft:#fff3d6;
+      --info:#175cd3;
+      --info-soft:#eaf2ff;
+      --purple:#6941c6;
+      --purple-soft:#f0ebff;
+      --shadow:0 18px 50px rgba(19,32,25,.07);
+      --shadow-sm:0 8px 24px rgba(19,32,25,.05);
+      --radius:20px;
+      --radius-sm:14px;
+      --sidebar:280px;
+      --topbar:72px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:"Manrope",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    a{text-decoration:none;color:inherit}
+    img{display:block;max-width:100%}
+    .hidden{display:none!important}
+    .app{min-height:100dvh}
+
+    .auth-view{
+      min-height:100dvh;
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      background:var(--surface);
+    }
+    .auth-visual{
+      padding:44px;
+      background:
+        linear-gradient(180deg,rgba(15,106,66,.02),rgba(15,106,66,.08)),
+        var(--bg);
+      border-right:1px solid var(--line);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .auth-visual h1{
+      font-size:clamp(44px,5vw,72px);
+      line-height:.98;
+      letter-spacing:-3px;
+      max-width:700px;
+      margin:32px 0 18px;
+    }
+    .auth-visual p{max-width:620px;color:var(--muted);font-size:16px;line-height:1.7}
+    .auth-features{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:32px;
+    }
+    .auth-feature{
+      border:1px solid var(--line);
+      background:var(--surface);
+      border-radius:18px;
+      padding:16px;
+      min-height:130px;
+    }
+    .auth-feature strong{display:block;font-size:14px;margin:14px 0 5px}
+    .auth-feature span{font-size:11px;color:var(--muted);line-height:1.5}
+    .auth-panel{
+      display:grid;
+      place-items:center;
+      padding:28px;
+    }
+    .auth-card{
+      width:min(440px,100%);
+    }
+    .auth-card h2{
+      font-size:34px;
+      letter-spacing:-1.4px;
+      margin:18px 0 8px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:800;
+      letter-spacing:-.4px;
+    }
+    .brand-mark{
+      width:42px;
+      height:42px;
+      border-radius:13px;
+      background:var(--brand);
+      color:#fff;
+      display:grid;
+      place-items:center;
+      font-weight:800;
+    }
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:var(--brand-soft);
+      color:var(--brand-dark);
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.45px;
+    }
+
+    .field{margin-bottom:15px}
+    label{
+      display:block;
+      font-size:12px;
+      font-weight:800;
+      margin-bottom:7px;
+    }
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--line-strong);
+      border-radius:14px;
+      background:#fff;
+      padding:13px 14px;
+      outline:none;
+      color:var(--ink);
+      font-size:16px;
+    }
+    textarea{min-height:104px;resize:vertical}
+    input:focus,select:focus,textarea:focus{
+      border-color:var(--brand);
+      box-shadow:0 0 0 3px var(--brand-soft);
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      min-height:44px;
+      padding:11px 15px;
+      font-weight:800;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      transition:.18s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-primary:hover{background:var(--brand-dark)}
+    .btn-secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+    .btn-danger{background:var(--danger-soft);color:var(--danger)}
+    .btn-warning{background:var(--warning-soft);color:var(--warning)}
+    .btn-info{background:var(--info-soft);color:var(--info)}
+    .btn-ghost{background:transparent;color:var(--brand)}
+    .wide{width:100%}
+
+    .notice{
+      padding:12px 14px;
+      border-radius:13px;
+      background:var(--info-soft);
+      color:#1849a9;
+      font-size:12px;
+      line-height:1.5;
+      margin:12px 0;
+    }
+    .notice.error{background:var(--danger-soft);color:var(--danger)}
+    .notice.success{background:var(--brand-soft);color:var(--brand-dark)}
+
+    .topbar{
+      position:fixed;
+      top:0;left:var(--sidebar);right:0;
+      height:var(--topbar);
+      z-index:30;
+      background:rgba(255,255,255,.97);
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 24px;
+      backdrop-filter:blur(10px) saturate(140%);
+    }
+    .topbar-left{display:flex;align-items:center;gap:12px;min-width:0}
+    .page-title{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:-.4px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .top-actions{display:flex;align-items:center;gap:9px}
+    .icon-btn{
+      width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:13px;
+      display:grid;place-items:center;color:var(--ink);position:relative;
+    }
+    .badge-dot{
+      position:absolute;
+      width:9px;height:9px;border-radius:50%;
+      background:var(--danger);
+      top:6px;right:6px;
+      border:2px solid white;
+    }
+
+    .sidebar{
+      position:fixed;
+      top:0;left:0;bottom:0;
+      width:var(--sidebar);
+      background:#fff;
+      border-right:1px solid var(--line);
+      z-index:40;
+      display:flex;
+      flex-direction:column;
+    }
+    .sidebar-head{
+      height:var(--topbar);
+      display:flex;
+      align-items:center;
+      padding:0 18px;
+      border-bottom:1px solid var(--line);
+    }
+    .sidebar-body{
+      padding:16px 12px;
+      overflow:auto;
+      flex:1;
+    }
+    .nav-group{margin-bottom:18px}
+    .nav-label{
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.8px;
+      color:var(--muted-2);
+      font-weight:800;
+      padding:0 10px 7px;
+    }
+    .nav-btn{
+      width:100%;
+      border:none;
+      background:transparent;
+      color:#5f6d65;
+      border-radius:12px;
+      padding:11px 12px;
+      display:flex;
+      align-items:center;
+      gap:11px;
+      font-size:13px;
+      font-weight:700;
+      text-align:left;
+      margin-bottom:3px;
+    }
+    .nav-btn:hover{background:var(--surface-2);color:var(--ink)}
+    .nav-btn.active{background:var(--brand-soft);color:var(--brand-dark)}
+    .nav-btn svg{flex:0 0 auto}
+    .nav-count{
+      margin-left:auto;
+      min-width:24px;
+      height:24px;
+      border-radius:999px;
+      background:var(--surface-2);
+      display:grid;
+      place-items:center;
+      font-size:10px;
+      font-weight:800;
+    }
+    .nav-btn.active .nav-count{background:#fff}
+    .sidebar-foot{
+      border-top:1px solid var(--line);
+      padding:12px;
+    }
+    .admin-mini{
+      display:grid;
+      grid-template-columns:40px 1fr auto;
+      gap:10px;
+      align-items:center;
+      padding:10px;
+      border-radius:14px;
+      background:var(--surface-2);
+    }
+    .admin-avatar{
+      width:40px;height:40px;border-radius:12px;background:var(--brand);color:#fff;
+      display:grid;place-items:center;font-weight:800;
+    }
+    .admin-mini strong{font-size:12px;display:block}
+    .admin-mini span{font-size:10px;color:var(--muted)}
+
+    .main{
+      margin-left:var(--sidebar);
+      padding-top:var(--topbar);
+      min-height:100dvh;
+    }
+    .main-inner{
+      width:min(1500px,100%);
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .section{display:none}
+    .section.active{display:block}
+
+    .section-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+    .section-head h1{
+      margin:0 0 5px;
+      font-size:32px;
+      letter-spacing:-1.2px;
+    }
+    .section-head p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .stat-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:var(--shadow-sm);
+    }
+    .stat-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .stat-icon{
+      width:38px;height:38px;border-radius:12px;
+      display:grid;place-items:center;
+      background:var(--surface-2);
+      color:var(--brand);
+    }
+    .stat-card strong{
+      display:block;
+      font-size:28px;
+      letter-spacing:-1px;
+      margin:16px 0 2px;
+    }
+    .stat-card span{font-size:11px;color:var(--muted);font-weight:700}
+
+    .dashboard-grid{
+      display:grid;
+      grid-template-columns:1.45fr .55fr;
+      gap:14px;
+    }
+    .panel{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:var(--shadow-sm);
+      overflow:hidden;
+    }
+    .panel-head{
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .panel-head h2{font-size:16px;margin:0;letter-spacing:-.35px}
+    .panel-body{padding:16px 18px}
+    .panel-body.flush{padding:0}
+    .activity-list{display:grid}
+    .activity-item{
+      display:grid;
+      grid-template-columns:38px 1fr auto;
+      gap:11px;
+      align-items:start;
+      padding:12px 0;
+      border-bottom:1px solid var(--line);
+    }
+    .activity-item:last-child{border-bottom:0}
+    .activity-icon{
+      width:38px;height:38px;border-radius:12px;background:var(--surface-2);
+      display:grid;place-items:center;color:var(--brand)
+    }
+    .activity-item strong{font-size:12px;display:block;margin-bottom:3px}
+    .activity-item p{margin:0;font-size:11px;color:var(--muted);line-height:1.4}
+    .activity-item time{font-size:10px;color:var(--muted-2);white-space:nowrap}
+
+    .toolbar{
+      display:grid;
+      grid-template-columns:minmax(240px,1fr) 180px 180px 180px auto;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:var(--shadow-sm);
+    }
+    table{width:100%;border-collapse:collapse;min-width:900px}
+    th,td{
+      padding:13px 14px;
+      text-align:left;
+      border-bottom:1px solid var(--line);
+      vertical-align:middle;
+      font-size:12px;
+    }
+    th{
+      background:#fafbfa;
+      color:var(--muted);
+      text-transform:uppercase;
+      font-size:10px;
+      letter-spacing:.5px;
+      font-weight:800;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+    tbody tr:hover td{background:#fbfcfb}
+    .cell-title{font-weight:800;font-size:12px}
+    .cell-sub{font-size:10px;color:var(--muted);margin-top:3px}
+
+    .status,.role-chip,.priority-chip{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 9px;
+      border-radius:999px;
+      font-size:9px;
+      text-transform:uppercase;
+      letter-spacing:.35px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .s-submitted,.s-under_review{background:var(--warning-soft);color:var(--warning)}
+    .s-verified,.s-assigned,.s-in_progress{background:var(--info-soft);color:var(--info)}
+    .s-resolved,.s-community_confirmed{background:var(--brand-soft);color:var(--brand-dark)}
+    .s-disputed,.s-invalid{background:var(--danger-soft);color:var(--danger)}
+    .s-duplicate,.s-outside_service_area{background:var(--surface-2);color:var(--muted)}
+    .p-critical{background:var(--danger-soft);color:var(--danger)}
+    .p-high{background:#fff0e6;color:#c2410c}
+    .p-normal{background:var(--info-soft);color:var(--info)}
+    .p-low{background:var(--surface-2);color:var(--muted)}
+    .r-admin{background:var(--purple-soft);color:var(--purple)}
+    .r-moderator{background:var(--info-soft);color:var(--info)}
+    .r-resident{background:var(--surface-2);color:var(--muted)}
+    .r-municipality_manager,.r-department_staff,.r-field_worker{background:var(--brand-soft);color:var(--brand-dark)}
+
+    .empty{
+      padding:42px 18px;
+      text-align:center;
+      color:var(--muted);
+    }
+    .empty strong{display:block;color:var(--ink);margin-bottom:5px}
+
+    .kpi-row{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .mini-kpi{
+      background:var(--surface-2);
+      border-radius:14px;
+      padding:14px;
+    }
+    .mini-kpi strong{font-size:20px;display:block}
+    .mini-kpi span{font-size:10px;color:var(--muted);font-weight:700}
+
+    .cards-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+    .entity-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:var(--shadow-sm);
+    }
+    .entity-card h3{font-size:14px;margin:0 0 4px}
+    .entity-card p{font-size:11px;color:var(--muted);line-height:1.5;margin:0 0 14px}
+    .entity-meta{display:flex;gap:8px;flex-wrap:wrap}
+    .meta-pill{
+      padding:6px 8px;border-radius:999px;background:var(--surface-2);
+      font-size:9px;font-weight:800;color:var(--muted)
+    }
+
+    .map-panel{height:640px}
+    #reportsMap{height:100%;width:100%}
+
+    .analytics-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:14px;
+    }
+    .bar-list{display:grid;gap:12px}
+    .bar-row{}
+    .bar-label{
+      display:flex;align-items:center;justify-content:space-between;
+      font-size:11px;font-weight:700;margin-bottom:6px;
+    }
+    .bar-track{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+    .bar-fill{height:100%;background:var(--brand);border-radius:999px}
+
+    .modal{
+      position:fixed;
+      inset:0;
+      z-index:100;
+      background:rgba(8,16,12,.52);
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+    .modal-card{
+      width:min(1120px,100%);
+      max-height:92dvh;
+      overflow:auto;
+      background:#fff;
+      border-radius:24px;
+      box-shadow:var(--shadow);
+    }
+    .modal-head{
+      position:sticky;
+      top:0;
+      z-index:3;
+      background:#fff;
+      border-bottom:1px solid var(--line);
+      padding:18px 20px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .modal-head h2{font-size:24px;letter-spacing:-.8px;margin:8px 0 4px}
+    .modal-body{padding:18px 20px 22px}
+    .detail-grid{
+      display:grid;
+      grid-template-columns:1.3fr .7fr;
+      gap:14px;
+    }
+    .stack{display:grid;gap:14px}
+    .detail-card{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      background:#fff;
+    }
+    .detail-card h3{font-size:14px;margin:0 0 12px}
+    .photo-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+    }
+    .photo-grid img{
+      width:100%;
+      aspect-ratio:1;
+      object-fit:cover;
+      border-radius:13px;
+      border:1px solid var(--line);
+    }
+    .timeline{position:relative;padding-left:22px}
+    .timeline:before{
+      content:"";
+      position:absolute;
+      left:6px;top:4px;bottom:8px;
+      width:2px;background:var(--line);
+    }
+    .timeline-item{position:relative;padding:0 0 16px 14px}
+    .timeline-item:before{
+      content:"";
+      position:absolute;
+      width:12px;height:12px;border-radius:50%;
+      background:var(--brand);
+      left:-21px;top:4px;
+      border:3px solid #fff;
+      box-shadow:0 0 0 1px var(--brand);
+    }
+    .timeline-item strong{display:block;font-size:12px}
+    .timeline-item span{font-size:10px;color:var(--muted)}
+    .location-box{
+      min-height:150px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:16px;
+      background:var(--surface-2);
+      border-radius:14px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:24px;
+      transform:translateX(-50%) translateY(20px);
+      width:min(calc(100% - 32px),460px);
+      background:#101914;
+      color:#fff;
+      border-radius:14px;
+      padding:13px 15px;
+      font-size:12px;
+      font-weight:800;
+      z-index:999;
+      opacity:0;
+      pointer-events:none;
+      transition:.25s ease;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    .loader{
+      width:17px;height:17px;border:2px solid rgba(255,255,255,.4);
+      border-top-color:#fff;border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .mobile-menu{display:none}
+
+    @media(max-width:1200px){
+      :root{--sidebar:240px}
+      .stats-grid{grid-template-columns:repeat(3,1fr)}
+      .dashboard-grid{grid-template-columns:1fr}
+      .cards-grid{grid-template-columns:repeat(2,1fr)}
+      .toolbar{grid-template-columns:1fr 1fr 1fr}
+      .toolbar .btn{width:100%}
+    }
+
+    @media(max-width:900px){
+      :root{--sidebar:0px}
+      .sidebar{
+        width:280px;
+        transform:translateX(-100%);
+        transition:.25s ease;
+        box-shadow:var(--shadow);
+      }
+      .sidebar.open{transform:translateX(0)}
+      .topbar{left:0;padding:0 14px}
+      .mobile-menu{display:grid}
+      .main{margin-left:0}
+      .main-inner{padding:16px}
+      .auth-view{grid-template-columns:1fr}
+      .auth-visual{display:none}
+      .auth-panel{min-height:100dvh}
+      .stats-grid{grid-template-columns:repeat(2,1fr)}
+      .cards-grid,.analytics-grid{grid-template-columns:1fr}
+      .toolbar{grid-template-columns:1fr}
+      .detail-grid{grid-template-columns:1fr}
+      .map-panel{height:500px}
+    }
+
+    @media(max-width:560px){
+      .stats-grid,.kpi-row{grid-template-columns:1fr 1fr}
+      .section-head{flex-direction:column}
+      .top-actions .desktop-only{display:none}
+      .photo-grid{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- AUTH -->
+<section id="authView" class="auth-view">
+  <div class="auth-visual">
+    <div>
+      <div class="brand">
+        <div class="brand-mark">CM</div>
+        <div>CM Civic Administration</div>
+      </div>
+
+      <span class="eyebrow" style="margin-top:46px">CM Technologies civic operations</span>
+      <h1>One command centre for community service issues.</h1>
+      <p>
+        Review service reports, verify evidence, track hotspots, manage staff,
+        coordinate departments, and maintain a clear audit trail across the CM Civic platform.
+      </p>
+
+      <div class="auth-features">
+        <div class="auth-feature">
+          <div class="stat-icon">01</div>
+          <strong>Live operations</strong>
+          <span>Realtime service reports and status changes from the resident platform.</span>
+        </div>
+        <div class="auth-feature">
+          <div class="stat-icon">02</div>
+          <strong>Evidence control</strong>
+          <span>Review photos, exact staff-only GPS coordinates and report histories.</span>
+        </div>
+        <div class="auth-feature">
+          <div class="stat-icon">03</div>
+          <strong>Accountability</strong>
+          <span>Track moderation actions, admin activity and resolution performance.</span>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:11px;margin:0">
+      CM Civic is currently an independent community reporting platform and not an official City of Mbombela municipal system unless formally integrated.
+    </p>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <div class="brand">
+        <div class="brand-mark">CM</div>
+        <div>Command Centre</div>
+      </div>
+
+      <h2>Admin sign in</h2>
+      <p style="color:var(--muted);line-height:1.6;margin-bottom:22px">
+        Use an account with admin, moderator, municipality manager, department staff or field worker access.
+      </p>
+
+      <div id="authNotice" class="notice hidden"></div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label>Email address</label>
+          <input id="loginEmail" type="email" required autocomplete="email" placeholder="admin@example.com">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input id="loginPassword" type="password" required autocomplete="current-password" placeholder="Your password">
+        </div>
+        <button id="loginBtn" type="submit" class="btn btn-primary wide">Sign in to Command Centre</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="appView" class="app hidden">
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-head">
+      <div class="brand">
+        <div class="brand-mark">CM</div>
+        <div>CM Civic</div>
+      </div>
+    </div>
+
+    <div class="sidebar-body">
+      <div class="nav-group">
+        <div class="nav-label">Operations</div>
+
+        <button class="nav-btn active" data-section="dashboardSection" data-title="Dashboard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </button>
+
+        <button class="nav-btn" data-section="reportsSection" data-title="Reports Command Centre">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          Reports
+          <span id="navReportsCount" class="nav-count">0</span>
+        </button>
+
+        <button class="nav-btn" data-section="mapSection" data-title="Live Issue Map">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/>
+          </svg>
+          Live Map
+        </button>
+
+        <button class="nav-btn" data-section="moderationSection" data-title="Moderation Queue">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          Moderation
+          <span id="navModerationCount" class="nav-count">0</span>
+        </button>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">People & structure</div>
+
+        <button class="nav-btn" data-section="residentsSection" data-title="Residents">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="7" r="4"/><path d="M17 11a4 4 0 1 0 0-8"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 14a6 6 0 0 1 5 7"/>
+          </svg>
+          Residents
+        </button>
+
+        <button class="nav-btn" data-section="staffSection" data-title="Staff & Roles">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>
+          </svg>
+          Staff & Roles
+        </button>
+
+        <button class="nav-btn" data-section="categoriesSection" data-title="Issue Categories">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 12h16M4 18h10"/>
+          </svg>
+          Categories
+        </button>
+
+        <button class="nav-btn" data-section="wardsSection" data-title="Wards & Areas">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          Wards & Areas
+        </button>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">Insights & governance</div>
+
+        <button class="nav-btn" data-section="analyticsSection" data-title="Analytics">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          Analytics
+        </button>
+
+        <button class="nav-btn" data-section="notificationsSection" data-title="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Notifications
+        </button>
+
+        <button class="nav-btn" data-section="auditSection" data-title="Audit Logs">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3v18h18"/><path d="M7 16l4-4 3 3 5-7"/>
+          </svg>
+          Audit Logs
+        </button>
+
+        <button class="nav-btn" data-section="settingsSection" data-title="System Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.1a1.7 1.7 0 0 0-.4-1.1 1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 3.8 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2V9.6h.1a1.7 1.7 0 0 0 1.1-.4 1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 8 3.8a1.7 1.7 0 0 0 1-.6A1.7 1.7 0 0 0 9.4 2.1V2h4v.1a1.7 1.7 0 0 0 .4 1.1 1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 20.2 8a1.7 1.7 0 0 0 .6 1 1.7 1.7 0 0 0 1.1.4h.1v4h-.1a1.7 1.7 0 0 0-1.1.4 1.7 1.7 0 0 0-.6 1z"/>
+          </svg>
+          Settings
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="admin-mini">
+        <div id="sidebarAvatar" class="admin-avatar">CM</div>
+        <div>
+          <strong id="sidebarName">Administrator</strong>
+          <span id="sidebarRole">Admin</span>
+        </div>
+        <button id="sidebarLogout" class="icon-btn" style="width:34px;height:34px" aria-label="Sign out">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <button id="mobileMenuBtn" class="icon-btn mobile-menu" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div id="topPageTitle" class="page-title">Dashboard</div>
+    </div>
+
+    <div class="top-actions">
+      <span id="topRole" class="eyebrow desktop-only">Admin</span>
+      <button id="topRefreshBtn" class="icon-btn" aria-label="Refresh">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
+      <button class="icon-btn" data-section-jump="notificationsSection" aria-label="Notifications">
+        <span id="topNotificationDot" class="badge-dot hidden"></span>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="main-inner">
+
+      <!-- DASHBOARD -->
+      <section id="dashboardSection" class="section active">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">City of Mbombela pilot</span>
+            <h1 style="margin-top:10px">Operations overview</h1>
+            <p>Live picture of public service issues, moderation workload and resolution progress.</p>
+          </div>
+          <button class="btn btn-primary" data-section-jump="reportsSection">Open Reports Command Centre</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-top"><span>All reports</span><div class="stat-icon">#</div></div>
+            <strong id="statTotal">0</strong>
+            <span>Total submitted</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top"><span>Awaiting review</span><div class="stat-icon">!</div></div>
+            <strong id="statReview">0</strong>
+            <span>Need moderation</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top"><span>Open issues</span><div class="stat-icon">○</div></div>
+            <strong id="statOpen">0</strong>
+            <span>Not yet resolved</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top"><span>Resolved</span><div class="stat-icon">✓</div></div>
+            <strong id="statResolved">0</strong>
+            <span>Closed successfully</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-top"><span>Critical</span><div class="stat-icon">▲</div></div>
+            <strong id="statCritical">0</strong>
+            <span>High urgency</span>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Recent reports</h2>
+              <button class="btn btn-ghost" data-section-jump="reportsSection">View all</button>
+            </div>
+            <div class="panel-body flush">
+              <div class="table-wrap" style="border:0;border-radius:0;box-shadow:none">
+                <table>
+                  <thead>
+                    <tr><th>Report</th><th>Category</th><th>Status</th><th>Priority</th><th>Area</th><th></th></tr>
+                  </thead>
+                  <tbody id="dashboardRecentRows"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Quick insights</h2></div>
+            <div class="panel-body">
+              <div class="kpi-row" style="grid-template-columns:1fr 1fr">
+                <div class="mini-kpi"><strong id="insightResidents">0</strong><span>Residents</span></div>
+                <div class="mini-kpi"><strong id="insightStaff">0</strong><span>Staff accounts</span></div>
+                <div class="mini-kpi"><strong id="insightCategories">0</strong><span>Issue categories</span></div>
+                <div class="mini-kpi"><strong id="insightWards">0</strong><span>Configured wards</span></div>
+              </div>
+              <div id="dashboardCategoryBars" class="bar-list" style="margin-top:16px"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid" style="margin-top:14px">
+          <div class="panel">
+            <div class="panel-head"><h2>Moderation queue</h2><button class="btn btn-ghost" data-section-jump="moderationSection">Open queue</button></div>
+            <div class="panel-body">
+              <div id="dashboardModerationList" class="activity-list"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Latest platform activity</h2></div>
+            <div class="panel-body">
+              <div id="dashboardActivityList" class="activity-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section id="reportsSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>Reports Command Centre</h1>
+            <p>Search, verify, prioritise and manage every community report.</p>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <input id="reportsSearch" type="search" placeholder="Search title, reference, area or description">
+          <select id="reportsStatus">
+            <option value="">All statuses</option>
+            <option value="submitted">Submitted</option>
+            <option value="under_review">Under review</option>
+            <option value="verified">Verified</option>
+            <option value="assigned">Assigned</option>
+            <option value="in_progress">In progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="community_confirmed">Community confirmed</option>
+            <option value="disputed">Disputed</option>
+            <option value="duplicate">Duplicate</option>
+            <option value="invalid">Invalid</option>
+            <option value="outside_service_area">Outside service area</option>
+          </select>
+          <select id="reportsPriority">
+            <option value="">All priorities</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="normal">Normal</option>
+            <option value="low">Low</option>
+          </select>
+          <select id="reportsCategory">
+            <option value="">All categories</option>
+          </select>
+          <button id="reportsRefresh" class="btn btn-primary">Refresh</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Report</th><th>Category</th><th>Status</th><th>Priority</th><th>Support</th><th>Area</th><th>Created</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="reportsRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MAP -->
+      <section id="mapSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>Live issue map</h1>
+            <p>Public approximate issue locations across Mbombela.</p>
+          </div>
+          <button id="fitMapBtn" class="btn btn-secondary">Fit all reports</button>
+        </div>
+        <div class="panel map-panel"><div id="reportsMap"></div></div>
+      </section>
+
+      <!-- MODERATION -->
+      <section id="moderationSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>Moderation queue</h1>
+            <p>Review new, disputed and questionable reports before they move forward.</p>
+          </div>
+        </div>
+        <div class="cards-grid" id="moderationCards"></div>
+      </section>
+
+      <!-- RESIDENTS -->
+      <section id="residentsSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>Residents</h1>
+            <p>View resident accounts, report history and trust information.</p>
+          </div>
+        </div>
+        <div class="toolbar" style="grid-template-columns:1fr 180px auto">
+          <input id="residentsSearch" type="search" placeholder="Search resident name or phone">
+          <select id="residentStatusFilter">
+            <option value="">All accounts</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <button id="residentsRefresh" class="btn btn-primary">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Resident</th><th>Trust score</th><th>Reports</th><th>Verified</th><th>Status</th><th>Joined</th></tr></thead>
+            <tbody id="residentsRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- STAFF -->
+      <section id="staffSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>Staff & roles</h1>
+            <p>Control access to administrative and operational roles.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User</th><th>Role</th><th>Account</th><th>Updated</th><th></th></tr></thead>
+            <tbody id="staffRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CATEGORIES -->
+      <section id="categoriesSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>Issue categories</h1>
+            <p>Control what residents can report and how categories appear.</p>
+          </div>
+          <button id="newCategoryBtn" class="btn btn-primary">Add category</button>
+        </div>
+        <div id="categoryCards" class="cards-grid"></div>
+      </section>
+
+      <!-- WARDS -->
+      <section id="wardsSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>Wards & areas</h1>
+            <p>Configure City of Mbombela wards used for future routing and analytics.</p>
+          </div>
+          <button id="newWardBtn" class="btn btn-primary">Add ward</button>
+        </div>
+        <div id="wardCards" class="cards-grid"></div>
+      </section>
+
+      <!-- ANALYTICS -->
+      <section id="analyticsSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>Analytics</h1>
+            <p>Understand service demand, status distribution and category hotspots.</p>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card"><div class="stat-top"><span>Resolution rate</span></div><strong id="analyticsResolutionRate">0%</strong><span>Resolved / total</span></div>
+          <div class="stat-card"><div class="stat-top"><span>Average support</span></div><strong id="analyticsAvgSupport">0</strong><span>Residents affected per report</span></div>
+          <div class="stat-card"><div class="stat-top"><span>Most reported</span></div><strong id="analyticsTopCategory">—</strong><span>Top issue category</span></div>
+          <div class="stat-card"><div class="stat-top"><span>Critical share</span></div><strong id="analyticsCriticalShare">0%</strong><span>Critical priority reports</span></div>
+        </div>
+
+        <div class="analytics-grid">
+          <div class="panel">
+            <div class="panel-head"><h2>Reports by category</h2></div>
+            <div class="panel-body"><div id="analyticsCategoryBars" class="bar-list"></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Reports by status</h2></div>
+            <div class="panel-body"><div id="analyticsStatusBars" class="bar-list"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section id="notificationsSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>Notifications</h1>
+            <p>View system notifications generated by report activity.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Notification</th><th>User</th><th>Report</th><th>Read</th><th>Created</th></tr></thead>
+            <tbody id="notificationsRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- AUDIT -->
+      <section id="auditSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>Audit logs</h1>
+            <p>System activity records for administrative accountability.</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Action</th><th>Entity</th><th>Actor</th><th>Metadata</th><th>Created</th></tr></thead>
+            <tbody id="auditRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settingsSection" class="section">
+        <div class="section-head">
+          <div>
+            <h1>System settings</h1>
+            <p>Platform configuration and environment information.</p>
+          </div>
+        </div>
+
+        <div class="analytics-grid">
+          <div class="panel">
+            <div class="panel-head"><h2>Platform</h2></div>
+            <div class="panel-body">
+              <div class="field">
+                <label>Platform name</label>
+                <input value="CM Civic" disabled>
+              </div>
+              <div class="field">
+                <label>Pilot municipality</label>
+                <input id="settingsMunicipality" value="City of Mbombela" disabled>
+              </div>
+              <div class="field">
+                <label>Environment</label>
+                <input value="Production backend / V1 interface" disabled>
+              </div>
+              <div class="notice">
+                CM Civic remains an independent community platform until an official municipal integration is approved.
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Your access</h2></div>
+            <div class="panel-body">
+              <div class="field">
+                <label>Signed-in account</label>
+                <input id="settingsEmail" disabled>
+              </div>
+              <div class="field">
+                <label>Current role</label>
+                <input id="settingsRole" disabled>
+              </div>
+              <button id="settingsLogoutBtn" class="btn btn-danger wide">Sign out</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</section>
+
+<!-- REPORT DETAIL MODAL -->
+<div id="reportModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <span id="modalReportStatus" class="status"></span>
+        <h2 id="modalReportTitle">Report</h2>
+        <div id="modalReportMeta" style="font-size:11px;color:var(--muted)"></div>
+      </div>
+      <button id="closeReportModal" class="icon-btn">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="detail-grid">
+        <div class="stack">
+          <div class="detail-card">
+            <h3>Description</h3>
+            <p id="modalReportDescription" style="margin:0;color:var(--muted);font-size:12px;line-height:1.7"></p>
+          </div>
+
+          <div class="detail-card">
+            <h3>Evidence photos</h3>
+            <div id="modalPhotoGrid" class="photo-grid"></div>
+          </div>
+
+          <div class="detail-card">
+            <h3>Status timeline</h3>
+            <div id="modalTimeline" class="timeline"></div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="detail-card">
+            <h3>Manage report</h3>
+
+            <div class="field">
+              <label>Status</label>
+              <select id="modalStatusSelect">
+                <option value="submitted">Submitted</option>
+                <option value="under_review">Under review</option>
+                <option value="verified">Verified</option>
+                <option value="assigned">Assigned</option>
+                <option value="in_progress">In progress</option>
+                <option value="resolved">Resolved</option>
+                <option value="community_confirmed">Community confirmed</option>
+                <option value="disputed">Disputed</option>
+                <option value="duplicate">Duplicate</option>
+                <option value="invalid">Invalid</option>
+                <option value="outside_service_area">Outside service area</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Priority</label>
+              <select id="modalPrioritySelect">
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Moderation / internal note</label>
+              <textarea id="modalAdminNote" placeholder="Optional internal note"></textarea>
+            </div>
+
+            <button id="saveReportChangesBtn" class="btn btn-primary wide">Save report changes</button>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+              <button id="quickVerifyBtn" class="btn btn-info">Verify</button>
+              <button id="quickRejectBtn" class="btn btn-danger">Reject</button>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <h3>Private exact location</h3>
+            <div id="modalLocationBox" class="location-box">No exact location saved.</div>
+          </div>
+
+          <div class="detail-card">
+            <h3>Report facts</h3>
+            <div id="modalReportFacts" style="font-size:11px;color:var(--muted);line-height:1.8"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIMPLE FORM MODAL -->
+<div id="formModal" class="modal hidden">
+  <div class="modal-card" style="width:min(560px,100%)">
+    <div class="modal-head">
+      <div>
+        <h2 id="formModalTitle" style="margin:0">Add</h2>
+      </div>
+      <button id="closeFormModal" class="icon-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="formModalContent"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""></script>
+
+<script>
+(() => {
+  "use strict";
+
+  const SUPABASE_URL = "https://whfqhhdtvftfbwojhasq.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EqPFSmCfv5GHgbDCELgIQw_MgqbQfhk";
+
+  const sb = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
+    }
+  );
+
+  const state = {
+    user:null,
+    profile:null,
+    role:null,
+    reports:[],
+    residents:[],
+    roles:[],
+    categories:[],
+    wards:[],
+    municipalities:[],
+    notifications:[],
+    auditLogs:[],
+    moderationActions:[],
+    selectedReport:null,
+    realtimeChannel:null,
+    map:null,
+    mapMarkers:[],
+    currentSection:"dashboardSection"
+  };
+
+  const $ = id => document.getElementById(id);
+  const $$ = sel => [...document.querySelectorAll(sel)];
+
+  function esc(v=""){
+    return String(v)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function nice(v=""){
+    return String(v).replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
+  }
+
+  function fmt(d){
+    if(!d) return "—";
+    return new Intl.DateTimeFormat("en-ZA",{
+      day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"
+    }).format(new Date(d));
+  }
+
+  function initials(name="CM"){
+    return String(name).trim().split(/\s+/).slice(0,2).map(p=>p[0]?.toUpperCase()).join("") || "CM";
+  }
+
+  function pct(n,d){
+    return d ? Math.round((n/d)*100) : 0;
+  }
+
+  let toastTimer;
+  function toast(message){
+    const el=$("toast");
+    el.textContent=message;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>el.classList.remove("show"),3200);
+  }
+
+  function setNotice(id,message="",type=""){
+    const el=$(id);
+    if(!message){
+      el.className="notice hidden";
+      el.textContent="";
+      return;
+    }
+    el.className=`notice ${type}`.trim();
+    el.textContent=message;
+  }
+
+  function setLoading(btn,on,label){
+    if(!btn) return;
+    if(on){
+      btn.dataset.old=btn.innerHTML;
+      btn.disabled=true;
+      btn.innerHTML=`<span class="loader"></span>${esc(label || "Working...")}`;
+    }else{
+      btn.disabled=false;
+      btn.innerHTML=btn.dataset.old || label || "Continue";
+    }
+  }
+
+  async function boot(){
+    bindUI();
+
+    const {data:{session}}=await sb.auth.getSession();
+    if(session?.user) await enterApp(session.user);
+    else showAuth();
+
+    sb.auth.onAuthStateChange(async (event,session)=>{
+      if(event==="SIGNED_IN" && session?.user) await enterApp(session.user);
+      if(event==="SIGNED_OUT"){
+        leaveRealtime();
+        showAuth();
+      }
+    });
+  }
+
+  function bindUI(){
+    $("loginForm").addEventListener("submit",login);
+    $("sidebarLogout").addEventListener("click",logout);
+    $("settingsLogoutBtn").addEventListener("click",logout);
+    $("topRefreshBtn").addEventListener("click",refreshAll);
+    $("reportsRefresh").addEventListener("click",refreshAll);
+    $("residentsRefresh").addEventListener("click",refreshAll);
+
+    $("mobileMenuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
+
+    $$("[data-section]").forEach(btn=>{
+      btn.addEventListener("click",()=>switchSection(btn.dataset.section,btn.dataset.title));
+    });
+
+    $$("[data-section-jump]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const target=btn.dataset.sectionJump;
+        const nav=$(`[data-section="${target}"]`);
+        switchSection(target,nav?.dataset.title || "");
+      });
+    });
+
+    ["reportsSearch","reportsStatus","reportsPriority","reportsCategory"].forEach(id=>{
+      $(id).addEventListener("input",renderReportsTable);
+    });
+
+    ["residentsSearch","residentStatusFilter"].forEach(id=>{
+      $(id).addEventListener("input",renderResidents);
+    });
+
+    $("closeReportModal").addEventListener("click",()=>$("reportModal").classList.add("hidden"));
+    $("reportModal").addEventListener("click",e=>{if(e.target===$("reportModal"))$("reportModal").classList.add("hidden")});
+
+    $("closeFormModal").addEventListener("click",()=>$("formModal").classList.add("hidden"));
+    $("formModal").addEventListener("click",e=>{if(e.target===$("formModal"))$("formModal").classList.add("hidden")});
+
+    $("saveReportChangesBtn").addEventListener("click",saveSelectedReport);
+    $("quickVerifyBtn").addEventListener("click",()=>quickSetStatus("verified"));
+    $("quickRejectBtn").addEventListener("click",()=>quickSetStatus("invalid"));
+
+    $("fitMapBtn").addEventListener("click",fitMap);
+    $("newCategoryBtn").addEventListener("click",()=>openCategoryForm());
+    $("newWardBtn").addEventListener("click",()=>openWardForm());
+  }
+
+  async function login(e){
+    e.preventDefault();
+    const btn=$("loginBtn");
+    setLoading(btn,true,"Signing in...");
+    setNotice("authNotice");
+
+    const {error}=await sb.auth.signInWithPassword({
+      email:$("loginEmail").value.trim(),
+      password:$("loginPassword").value
+    });
+
+    setLoading(btn,false);
+    if(error) setNotice("authNotice",error.message,"error");
+  }
+
+  async function logout(){
+    leaveRealtime();
+    await sb.auth.signOut();
+  }
+
+  function showAuth(){
+    $("appView").classList.add("hidden");
+    $("authView").classList.remove("hidden");
+  }
+
+  async function enterApp(user){
+    state.user=user;
+
+    const [{data:roleRow,error:roleError},{data:profile}] = await Promise.all([
+      sb.from("user_roles").select("role").eq("user_id",user.id).maybeSingle(),
+      sb.from("profiles").select("*").eq("id",user.id).maybeSingle()
+    ]);
+
+    const allowed=["admin","moderator","municipality_manager","department_staff","field_worker"];
+
+    if(roleError || !roleRow || !allowed.includes(roleRow.role)){
+      await sb.auth.signOut();
+      setNotice("authNotice","This account does not have Command Centre access.","error");
+      showAuth();
+      return;
+    }
+
+    state.role=roleRow.role;
+    state.profile=profile || {};
+
+    $("authView").classList.add("hidden");
+    $("appView").classList.remove("hidden");
+
+    renderIdentity();
+
+    await refreshAll();
+    setupRealtime();
+    switchSection("dashboardSection","Dashboard");
+  }
+
+  function renderIdentity(){
+    const name=state.profile?.full_name || state.user?.user_metadata?.full_name || "Administrator";
+    const role=nice(state.role);
+
+    $("sidebarName").textContent=name;
+    $("sidebarRole").textContent=role;
+    $("sidebarAvatar").textContent=initials(name);
+    $("topRole").textContent=role;
+    $("settingsEmail").value=state.user?.email || "";
+    $("settingsRole").value=role;
+  }
+
+  function switchSection(id,title){
+    state.currentSection=id;
+
+    $$(".section").forEach(sec=>sec.classList.toggle("active",sec.id===id));
+    $$("[data-section]").forEach(btn=>btn.classList.toggle("active",btn.dataset.section===id));
+
+    $("topPageTitle").textContent=title || "CM Civic";
+    $("sidebar").classList.remove("open");
+
+    if(id==="mapSection"){
+      setTimeout(renderMap,100);
+    }
+
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  async function refreshAll(){
+    await Promise.all([
+      loadReports(),
+      loadResidentsAndRoles(),
+      loadCategories(),
+      loadWards(),
+      loadMunicipalities(),
+      loadNotifications(),
+      loadAuditLogs(),
+      loadModerationActions()
+    ]);
+
+    renderAll();
+    toast("Command Centre updated.");
+  }
+
+  async function loadReports(){
+    const {data,error}=await sb.from("reports").select(`
+      *,
+      issue_categories(id,name,slug),
+      municipalities(id,name,code),
+      wards(id,ward_number,name),
+      report_images(id,object_path,image_type,created_at),
+      report_locations(latitude,longitude,accuracy_meters,detected_address),
+      report_status_history(id,old_status,new_status,note,created_at,changed_by)
+    `).order("created_at",{ascending:false}).limit(1000);
+
+    if(error){
+      console.error(error);
+      toast("Could not load reports: "+error.message);
+      return;
+    }
+    state.reports=data || [];
+  }
+
+  async function loadResidentsAndRoles(){
+    const [{data:profiles,error:pErr},{data:roles,error:rErr}] = await Promise.all([
+      sb.from("profiles").select("*").order("created_at",{ascending:false}),
+      sb.from("user_roles").select("*").order("updated_at",{ascending:false})
+    ]);
+
+    if(!pErr) state.residents=profiles || [];
+    if(!rErr) state.roles=roles || [];
+  }
+
+  async function loadCategories(){
+    const {data,error}=await sb.from("issue_categories").select("*").order("sort_order");
+    if(!error) state.categories=data || [];
+  }
+
+  async function loadWards(){
+    const {data,error}=await sb.from("wards").select("*,municipalities(name,code)").order("ward_number");
+    if(!error) state.wards=data || [];
+  }
+
+  async function loadMunicipalities(){
+    const {data,error}=await sb.from("municipalities").select("*").order("name");
+    if(!error) state.municipalities=data || [];
+  }
+
+  async function loadNotifications(){
+    const {data,error}=await sb.from("notifications").select("*").order("created_at",{ascending:false}).limit(500);
+    if(!error) state.notifications=data || [];
+  }
+
+  async function loadAuditLogs(){
+    const {data,error}=await sb.from("audit_logs").select("*").order("created_at",{ascending:false}).limit(500);
+    if(!error) state.auditLogs=data || [];
+  }
+
+  async function loadModerationActions(){
+    const {data,error}=await sb.from("moderation_actions").select("*").order("created_at",{ascending:false}).limit(300);
+    if(!error) state.moderationActions=data || [];
+  }
+
+  function renderAll(){
+    renderDashboard();
+    renderReportFilters();
+    renderReportsTable();
+    renderModeration();
+    renderResidents();
+    renderStaff();
+    renderCategories();
+    renderWards();
+    renderAnalytics();
+    renderNotifications();
+    renderAudit();
+    renderNavCounts();
+
+    if(state.currentSection==="mapSection") renderMap();
+  }
+
+  function renderNavCounts(){
+    $("navReportsCount").textContent=state.reports.length;
+    $("navModerationCount").textContent=state.reports.filter(r=>["submitted","under_review","disputed"].includes(r.status)).length;
+
+    const unread=state.notifications.filter(n=>!n.read).length;
+    $("topNotificationDot").classList.toggle("hidden",unread===0);
+  }
+
+  function renderDashboard(){
+    const reports=state.reports;
+    const openStatuses=["submitted","under_review","verified","assigned","in_progress","disputed"];
+
+    const total=reports.length;
+    const review=reports.filter(r=>["submitted","under_review","disputed"].includes(r.status)).length;
+    const open=reports.filter(r=>openStatuses.includes(r.status)).length;
+    const resolved=reports.filter(r=>["resolved","community_confirmed"].includes(r.status)).length;
+    const critical=reports.filter(r=>r.priority==="critical").length;
+
+    $("statTotal").textContent=total;
+    $("statReview").textContent=review;
+    $("statOpen").textContent=open;
+    $("statResolved").textContent=resolved;
+    $("statCritical").textContent=critical;
+
+    const residentRoleIds=new Set(state.roles.filter(r=>r.role==="resident").map(r=>r.user_id));
+    const staffRoleIds=new Set(state.roles.filter(r=>r.role!=="resident").map(r=>r.user_id));
+
+    $("insightResidents").textContent=residentRoleIds.size;
+    $("insightStaff").textContent=staffRoleIds.size;
+    $("insightCategories").textContent=state.categories.filter(c=>c.active).length;
+    $("insightWards").textContent=state.wards.filter(w=>w.active).length;
+
+    $("dashboardRecentRows").innerHTML = reports.slice(0,8).map(reportRowCompact).join("")
+      || emptyTableRow(6,"No reports have been submitted yet.");
+
+    wireReportButtons();
+
+    const countsByCategory=countBy(reports,r=>r.issue_categories?.name || "Other");
+    $("dashboardCategoryBars").innerHTML=renderBars(countsByCategory,5);
+
+    const mod=reports.filter(r=>["submitted","under_review","disputed"].includes(r.status)).slice(0,6);
+    $("dashboardModerationList").innerHTML = mod.map(r=>`
+      <div class="activity-item">
+        <div class="activity-icon">!</div>
+        <div>
+          <strong>${esc(r.title)}</strong>
+          <p>${esc(r.reference_number || "")} • ${esc(r.public_location_label || "Mbombela")}</p>
+        </div>
+        <button class="btn btn-secondary" style="min-height:34px;padding:8px 10px" data-open-report="${r.id}">Review</button>
+      </div>
+    `).join("") || `<div class="empty"><strong>Queue is clear</strong>No reports currently need moderation.</div>`;
+
+    const recentActions=state.moderationActions.slice(0,6);
+    $("dashboardActivityList").innerHTML = recentActions.map(a=>`
+      <div class="activity-item">
+        <div class="activity-icon">↻</div>
+        <div>
+          <strong>${esc(nice(a.action))}</strong>
+          <p>${esc(a.reason || "Moderation action recorded")}</p>
+        </div>
+        <time>${fmt(a.created_at)}</time>
+      </div>
+    `).join("") || `<div class="empty"><strong>No activity yet</strong>Moderation activity will appear here.</div>`;
+
+    wireReportButtons();
+  }
+
+  function renderReportFilters(){
+    const current=$("reportsCategory").value;
+    $("reportsCategory").innerHTML = `<option value="">All categories</option>` +
+      state.categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+    $("reportsCategory").value=current;
+  }
+
+  function getFilteredReports(){
+    const q=$("reportsSearch").value.trim().toLowerCase();
+    const st=$("reportsStatus").value;
+    const pr=$("reportsPriority").value;
+    const cat=$("reportsCategory").value;
+
+    return state.reports.filter(r=>{
+      const blob=`${r.title||""} ${r.reference_number||""} ${r.public_location_label||""} ${r.description||""}`.toLowerCase();
+      return (!q || blob.includes(q))
+        && (!st || r.status===st)
+        && (!pr || r.priority===pr)
+        && (!cat || r.category_id===cat);
+    });
+  }
+
+  function renderReportsTable(){
+    const rows=getFilteredReports();
+
+    $("reportsRows").innerHTML = rows.map(r=>`
+      <tr>
+        <td>
+          <div class="cell-title">${esc(r.title)}</div>
+          <div class="cell-sub">${esc(r.reference_number || "")}</div>
+        </td>
+        <td>${esc(r.issue_categories?.name || "Issue")}</td>
+        <td><span class="status s-${r.status}">${esc(nice(r.status))}</span></td>
+        <td><span class="priority-chip p-${r.priority}">${esc(nice(r.priority))}</span></td>
+        <td>${r.support_count || 0}</td>
+        <td>${esc(r.public_location_label || "Mbombela")}</td>
+        <td>${fmt(r.created_at)}</td>
+        <td><button class="btn btn-secondary" style="min-height:34px;padding:8px 10px" data-open-report="${r.id}">Manage</button></td>
+      </tr>
+    `).join("") || emptyTableRow(8,"No reports match your filters.");
+
+    wireReportButtons();
+  }
+
+  function reportRowCompact(r){
+    return `
+      <tr>
+        <td><div class="cell-title">${esc(r.title)}</div><div class="cell-sub">${esc(r.reference_number || "")}</div></td>
+        <td>${esc(r.issue_categories?.name || "Issue")}</td>
+        <td><span class="status s-${r.status}">${esc(nice(r.status))}</span></td>
+        <td><span class="priority-chip p-${r.priority}">${esc(nice(r.priority))}</span></td>
+        <td>${esc(r.public_location_label || "Mbombela")}</td>
+        <td><button class="btn btn-secondary" style="min-height:34px;padding:8px 10px" data-open-report="${r.id}">Open</button></td>
+      </tr>
+    `;
+  }
+
+  function emptyTableRow(cols,msg){
+    return `<tr><td colspan="${cols}"><div class="empty"><strong>${esc(msg)}</strong></div></td></tr>`;
+  }
+
+  function renderModeration(){
+    const mod=state.reports.filter(r=>["submitted","under_review","disputed"].includes(r.status));
+
+    $("moderationCards").innerHTML = mod.map(r=>`
+      <div class="entity-card">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+          <div>
+            <span class="status s-${r.status}">${esc(nice(r.status))}</span>
+            <h3 style="margin-top:12px">${esc(r.title)}</h3>
+          </div>
+          <span class="priority-chip p-${r.priority}">${esc(nice(r.priority))}</span>
+        </div>
+        <p>${esc(r.description || "No description provided.")}</p>
+        <div class="entity-meta">
+          <span class="meta-pill">${esc(r.reference_number || "")}</span>
+          <span class="meta-pill">${esc(r.issue_categories?.name || "Issue")}</span>
+          <span class="meta-pill">${esc(r.public_location_label || "Mbombela")}</span>
+        </div>
+        <button class="btn btn-primary wide" style="margin-top:14px" data-open-report="${r.id}">Review report</button>
+      </div>
+    `).join("") || `<div class="panel" style="grid-column:1/-1"><div class="empty"><strong>Moderation queue is clear</strong>New and disputed reports will appear here.</div></div>`;
+
+    wireReportButtons();
+  }
+
+  function renderResidents(){
+    const q=$("residentsSearch").value.trim().toLowerCase();
+    const status=$("residentStatusFilter").value;
+    const roleMap=new Map(state.roles.map(r=>[r.user_id,r.role]));
+
+    const residents=state.residents.filter(p=>{
+      const role=roleMap.get(p.id) || "resident";
+      if(role!=="resident") return false;
+      const blob=`${p.full_name||""} ${p.phone||""}`.toLowerCase();
+      const activeOk=!status || (status==="active" ? p.account_active : !p.account_active);
+      return (!q || blob.includes(q)) && activeOk;
+    });
+
+    $("residentsRows").innerHTML = residents.map(p=>`
+      <tr>
+        <td>
+          <div class="cell-title">${esc(p.full_name || "Resident")}</div>
+          <div class="cell-sub">${esc(p.phone || "No phone")}</div>
+        </td>
+        <td>${p.trust_score ?? 50}</td>
+        <td>${p.reports_submitted ?? 0}</td>
+        <td>${p.reports_verified ?? 0}</td>
+        <td><span class="status ${p.account_active ? "s-resolved":"s-invalid"}">${p.account_active ? "Active":"Inactive"}</span></td>
+        <td>${fmt(p.created_at)}</td>
+      </tr>
+    `).join("") || emptyTableRow(6,"No resident accounts found.");
+  }
+
+  function renderStaff(){
+    const profileMap=new Map(state.residents.map(p=>[p.id,p]));
+    const staff=state.roles.filter(r=>r.role!=="resident");
+
+    $("staffRows").innerHTML = staff.map(r=>{
+      const p=profileMap.get(r.user_id) || {};
+      return `
+        <tr>
+          <td>
+            <div class="cell-title">${esc(p.full_name || "Staff user")}</div>
+            <div class="cell-sub">${esc(r.user_id)}</div>
+          </td>
+          <td><span class="role-chip r-${r.role}">${esc(nice(r.role))}</span></td>
+          <td><span class="status ${p.account_active===false ? "s-invalid":"s-resolved"}">${p.account_active===false ? "Inactive":"Active"}</span></td>
+          <td>${fmt(r.updated_at)}</td>
+          <td>
+            ${state.role==="admin" ? `<button class="btn btn-secondary" style="min-height:34px;padding:8px 10px" data-edit-role="${r.user_id}">Change role</button>` : ""}
+          </td>
+        </tr>
+      `;
+    }).join("") || emptyTableRow(5,"No staff accounts found.");
+
+    $$("[data-edit-role]").forEach(btn=>{
+      btn.addEventListener("click",()=>openRoleForm(btn.dataset.editRole));
+    });
+  }
+
+  function renderCategories(){
+    $("categoryCards").innerHTML = state.categories.map(c=>`
+      <div class="entity-card">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+          <div>
+            <h3>${esc(c.name)}</h3>
+            <p>${esc(c.description || "No description")}</p>
+          </div>
+          <span class="status ${c.active ? "s-resolved":"s-invalid"}">${c.active ? "Active":"Inactive"}</span>
+        </div>
+        <div class="entity-meta">
+          <span class="meta-pill">${esc(c.slug)}</span>
+          <span class="meta-pill">Order ${c.sort_order}</span>
+        </div>
+        ${state.role==="admin" ? `<button class="btn btn-secondary wide" style="margin-top:14px" data-edit-category="${c.id}">Edit category</button>` : ""}
+      </div>
+    `).join("") || `<div class="panel" style="grid-column:1/-1"><div class="empty"><strong>No categories configured</strong></div></div>`;
+
+    $$("[data-edit-category]").forEach(btn=>btn.addEventListener("click",()=>openCategoryForm(btn.dataset.editCategory)));
+  }
+
+  function renderWards(){
+    $("wardCards").innerHTML = state.wards.map(w=>`
+      <div class="entity-card">
+        <div style="display:flex;justify-content:space-between;gap:12px">
+          <div>
+            <h3>Ward ${w.ward_number}</h3>
+            <p>${esc(w.name || "City of Mbombela ward")}</p>
+          </div>
+          <span class="status ${w.active ? "s-resolved":"s-invalid"}">${w.active ? "Active":"Inactive"}</span>
+        </div>
+        <div class="entity-meta">
+          <span class="meta-pill">${esc(w.municipalities?.name || "Municipality")}</span>
+        </div>
+        ${state.role==="admin" ? `<button class="btn btn-secondary wide" style="margin-top:14px" data-edit-ward="${w.id}">Edit ward</button>` : ""}
+      </div>
+    `).join("") || `<div class="panel" style="grid-column:1/-1"><div class="empty"><strong>No wards configured yet</strong>Add wards when you are ready to route reports geographically.</div></div>`;
+
+    $$("[data-edit-ward]").forEach(btn=>btn.addEventListener("click",()=>openWardForm(btn.dataset.editWard)));
+  }
+
+  function renderAnalytics(){
+    const reports=state.reports;
+    const total=reports.length;
+    const resolved=reports.filter(r=>["resolved","community_confirmed"].includes(r.status)).length;
+    const critical=reports.filter(r=>r.priority==="critical").length;
+    const avgSupport=total ? (reports.reduce((s,r)=>s+(r.support_count||0),0)/total).toFixed(1) : "0";
+
+    const catCounts=countBy(reports,r=>r.issue_categories?.name || "Other");
+    const sortedCats=Object.entries(catCounts).sort((a,b)=>b[1]-a[1]);
+
+    $("analyticsResolutionRate").textContent=`${pct(resolved,total)}%`;
+    $("analyticsAvgSupport").textContent=avgSupport;
+    $("analyticsTopCategory").textContent=sortedCats[0]?.[0] || "—";
+    $("analyticsCriticalShare").textContent=`${pct(critical,total)}%`;
+
+    $("analyticsCategoryBars").innerHTML=renderBars(catCounts,20);
+    $("analyticsStatusBars").innerHTML=renderBars(countBy(reports,r=>nice(r.status)),20);
+  }
+
+  function countBy(arr,fn){
+    return arr.reduce((acc,item)=>{
+      const k=fn(item);
+      acc[k]=(acc[k]||0)+1;
+      return acc;
+    },{});
+  }
+
+  function renderBars(counts,limit=10){
+    const entries=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,limit);
+    const max=entries[0]?.[1] || 1;
+
+    return entries.map(([name,count])=>`
+      <div class="bar-row">
+        <div class="bar-label"><span>${esc(name)}</span><strong>${count}</strong></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/max*100)}%"></div></div>
+      </div>
+    `).join("") || `<div class="empty"><strong>No analytics yet</strong>Data will appear after reports are submitted.</div>`;
+  }
+
+  function renderNotifications(){
+    $("notificationsRows").innerHTML = state.notifications.map(n=>`
+      <tr>
+        <td>
+          <div class="cell-title">${esc(n.title)}</div>
+          <div class="cell-sub">${esc(n.message)}</div>
+        </td>
+        <td>${esc(n.user_id)}</td>
+        <td>${esc(n.report_id || "—")}</td>
+        <td><span class="status ${n.read ? "s-resolved":"s-under_review"}">${n.read ? "Read":"Unread"}</span></td>
+        <td>${fmt(n.created_at)}</td>
+      </tr>
+    `).join("") || emptyTableRow(5,"No notifications found.");
+  }
+
+  function renderAudit(){
+    $("auditRows").innerHTML = state.auditLogs.map(a=>`
+      <tr>
+        <td><div class="cell-title">${esc(a.action)}</div></td>
+        <td>${esc(a.entity_type || "—")}<div class="cell-sub">${esc(a.entity_id || "")}</div></td>
+        <td>${esc(a.actor_id || "System")}</td>
+        <td><code style="font-size:10px">${esc(JSON.stringify(a.metadata || {})).slice(0,160)}</code></td>
+        <td>${fmt(a.created_at)}</td>
+      </tr>
+    `).join("") || emptyTableRow(5,"No audit logs have been written yet.");
+  }
+
+  function wireReportButtons(){
+    $$("[data-open-report]").forEach(btn=>{
+      btn.onclick=()=>openReport(btn.dataset.openReport);
+    });
+  }
+
+  async function signedUrl(path){
+    const {data,error}=await sb.storage.from("report-images").createSignedUrl(path,60*15);
+    return error ? null : data.signedUrl;
+  }
+
+  async function openReport(id){
+    const r=state.reports.find(x=>x.id===id);
+    if(!r) return;
+    state.selectedReport=r;
+
+    $("modalReportStatus").className=`status s-${r.status}`;
+    $("modalReportStatus").textContent=nice(r.status);
+    $("modalReportTitle").textContent=r.title;
+    $("modalReportMeta").textContent=`${r.reference_number || ""} • ${r.issue_categories?.name || "Issue"} • ${fmt(r.created_at)}`;
+    $("modalReportDescription").textContent=r.description || "No additional description was provided.";
+    $("modalStatusSelect").value=r.status;
+    $("modalPrioritySelect").value=r.priority;
+    $("modalAdminNote").value="";
+
+    const loc=r.report_locations;
+    $("modalLocationBox").innerHTML = loc
+      ? `<div>
+          <strong style="color:var(--ink)">${Number(loc.latitude).toFixed(6)}, ${Number(loc.longitude).toFixed(6)}</strong><br>
+          <span>Accuracy ±${Math.round(loc.accuracy_meters || 0)}m</span><br><br>
+          <a class="btn btn-secondary" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${loc.latitude},${loc.longitude}">Open in Google Maps</a>
+        </div>`
+      : "No exact location saved for this report.";
+
+    $("modalReportFacts").innerHTML=`
+      <strong>Public area:</strong> ${esc(r.public_location_label || "Mbombela")}<br>
+      <strong>Public coordinates:</strong> ${r.public_latitude ?? "—"}, ${r.public_longitude ?? "—"}<br>
+      <strong>Support count:</strong> ${r.support_count || 0}<br>
+      <strong>Reporter ID:</strong> ${esc(r.reporter_id)}<br>
+      <strong>Municipality:</strong> ${esc(r.municipalities?.name || "Not set")}<br>
+      <strong>Ward:</strong> ${r.wards ? `Ward ${r.wards.ward_number}` : "Not set"}<br>
+      <strong>Created:</strong> ${fmt(r.created_at)}
+    `;
+
+    const hist=[...(r.report_status_history || [])].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+    $("modalTimeline").innerHTML = hist.map(h=>`
+      <div class="timeline-item">
+        <strong>${esc(nice(h.new_status))}</strong>
+        <span>${esc(h.note || "Status updated")} • ${fmt(h.created_at)}</span>
+      </div>
+    `).join("") || `<div class="empty"><strong>No timeline yet</strong></div>`;
+
+    const imgs=r.report_images || [];
+    if(!imgs.length){
+      $("modalPhotoGrid").innerHTML=`<div class="empty" style="grid-column:1/-1"><strong>No evidence photos</strong></div>`;
+    }else{
+      $("modalPhotoGrid").innerHTML=`<div class="empty" style="grid-column:1/-1"><strong>Loading photos...</strong></div>`;
+      const urls=await Promise.all(imgs.map(i=>signedUrl(i.object_path)));
+      $("modalPhotoGrid").innerHTML=urls.filter(Boolean).map(u=>`<img src="${u}" alt="Report evidence">`).join("")
+        || `<div class="empty" style="grid-column:1/-1"><strong>Photos unavailable</strong></div>`;
+    }
+
+    $("reportModal").classList.remove("hidden");
+  }
+
+  async function saveSelectedReport(){
+    const r=state.selectedReport;
+    if(!r) return;
+
+    const btn=$("saveReportChangesBtn");
+    setLoading(btn,true,"Saving...");
+
+    const newStatus=$("modalStatusSelect").value;
+    const newPriority=$("modalPrioritySelect").value;
+    const note=$("modalAdminNote").value.trim();
+
+    const patch={
+      status:newStatus,
+      priority:newPriority
+    };
+
+    if(newStatus==="verified" && r.status!=="verified"){
+      patch.verified_at=new Date().toISOString();
+      patch.verified_by=state.user.id;
+    }
+
+    if(["resolved","community_confirmed"].includes(newStatus) && !["resolved","community_confirmed"].includes(r.status)){
+      patch.resolved_at=new Date().toISOString();
+      patch.resolved_by=state.user.id;
+    }
+
+    const {error}=await sb.from("reports").update(patch).eq("id",r.id);
+
+    if(!error && note){
+      let action="verify";
+      if(newStatus==="invalid") action="reject";
+      if(newStatus==="duplicate") action="mark_duplicate";
+
+      await sb.from("moderation_actions").insert({
+        report_id:r.id,
+        moderator_id:state.user.id,
+        action,
+        reason:note
+      });
+    }
+
+    if(!error){
+      await writeAudit("report_updated","report",r.id,{
+        old_status:r.status,
+        new_status:newStatus,
+        old_priority:r.priority,
+        new_priority:newPriority,
+        note
+      });
+    }
+
+    setLoading(btn,false);
+
+    if(error){
+      toast(error.message);
+      return;
+    }
+
+    toast("Report updated successfully.");
+    await refreshAll();
+
+    const updated=state.reports.find(x=>x.id===r.id);
+    if(updated) await openReport(updated.id);
+  }
+
+  async function quickSetStatus(status){
+    $("modalStatusSelect").value=status;
+    await saveSelectedReport();
+  }
+
+  function renderMap(){
+    if(typeof L==="undefined") return;
+
+    if(!state.map){
+      state.map=L.map("reportsMap").setView([-25.4753,30.9694],12);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+        maxZoom:19,
+        attribution:"&copy; OpenStreetMap contributors"
+      }).addTo(state.map);
+    }
+
+    state.mapMarkers.forEach(m=>m.remove());
+    state.mapMarkers=[];
+
+    state.reports
+      .filter(r=>Number.isFinite(r.public_latitude) && Number.isFinite(r.public_longitude))
+      .forEach(r=>{
+        const marker=L.circleMarker([r.public_latitude,r.public_longitude],{
+          radius:r.priority==="critical" ? 10 : 8,
+          weight:2,
+          fillOpacity:.75
+        }).addTo(state.map);
+
+        marker.bindPopup(`
+          <div style="font-family:Manrope,sans-serif;min-width:220px">
+            <strong>${esc(r.title)}</strong>
+            <div style="font-size:11px;color:#6f7d75;margin-top:5px">${esc(r.reference_number || "")}</div>
+            <div style="font-size:11px;margin-top:7px">${esc(r.issue_categories?.name || "Issue")} • ${esc(nice(r.status))}</div>
+          </div>
+        `);
+
+        marker.on("click",()=>marker.openPopup());
+        state.mapMarkers.push(marker);
+      });
+
+    setTimeout(()=>state.map.invalidateSize(),100);
+  }
+
+  function fitMap(){
+    if(!state.map || !state.mapMarkers.length) return;
+    const group=L.featureGroup(state.mapMarkers);
+    state.map.fitBounds(group.getBounds().pad(.15));
+  }
+
+  function openRoleForm(userId){
+    if(state.role!=="admin") return;
+
+    const roleRow=state.roles.find(r=>r.user_id===userId);
+    const profile=state.residents.find(p=>p.id===userId) || {};
+
+    $("formModalTitle").textContent="Change staff role";
+    $("formModalContent").innerHTML=`
+      <form id="roleForm">
+        <div class="field">
+          <label>User</label>
+          <input value="${esc(profile.full_name || userId)}" disabled>
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <select id="roleFormSelect">
+            <option value="resident">Resident</option>
+            <option value="moderator">Moderator</option>
+            <option value="admin">Admin</option>
+            <option value="municipality_manager">Municipality Manager</option>
+            <option value="department_staff">Department Staff</option>
+            <option value="field_worker">Field Worker</option>
+          </select>
+        </div>
+        <button class="btn btn-primary wide" type="submit">Save role</button>
+      </form>
+    `;
+
+    $("roleFormSelect").value=roleRow?.role || "resident";
+
+    $("roleForm").addEventListener("submit",async e=>{
+      e.preventDefault();
+      const role=$("roleFormSelect").value;
+      const {error}=await sb.from("user_roles").update({role}).eq("user_id",userId);
+
+      if(error){toast(error.message);return}
+
+      await writeAudit("role_changed","user_role",userId,{new_role:role});
+      toast("Role updated.");
+      $("formModal").classList.add("hidden");
+      await refreshAll();
+    });
+
+    $("formModal").classList.remove("hidden");
+  }
+
+  function openCategoryForm(id=null){
+    if(state.role!=="admin"){
+      toast("Only admins can manage categories.");
+      return;
+    }
+
+    const c=id ? state.categories.find(x=>x.id===id) : null;
+
+    $("formModalTitle").textContent=c ? "Edit category":"Add category";
+    $("formModalContent").innerHTML=`
+      <form id="categoryForm">
+        <div class="field"><label>Name</label><input id="catName" required value="${esc(c?.name || "")}"></div>
+        <div class="field"><label>Slug</label><input id="catSlug" required value="${esc(c?.slug || "")}"></div>
+        <div class="field"><label>Description</label><textarea id="catDescription">${esc(c?.description || "")}</textarea></div>
+        <div class="field"><label>Icon name</label><input id="catIcon" value="${esc(c?.icon || "")}" placeholder="e.g. road"></div>
+        <div class="field"><label>Sort order</label><input id="catOrder" type="number" value="${c?.sort_order ?? state.categories.length+1}"></div>
+        <div class="field">
+          <label>Status</label>
+          <select id="catActive"><option value="true">Active</option><option value="false">Inactive</option></select>
+        </div>
+        <button class="btn btn-primary wide" type="submit">${c ? "Save category":"Create category"}</button>
+      </form>
+    `;
+
+    $("catActive").value=String(c?.active ?? true);
+
+    $("categoryForm").addEventListener("submit",async e=>{
+      e.preventDefault();
+
+      const payload={
+        name:$("catName").value.trim(),
+        slug:$("catSlug").value.trim().toLowerCase().replace(/\s+/g,"-"),
+        description:$("catDescription").value.trim() || null,
+        icon:$("catIcon").value.trim() || null,
+        sort_order:Number($("catOrder").value || 0),
+        active:$("catActive").value==="true"
+      };
+
+      const query=c
+        ? sb.from("issue_categories").update(payload).eq("id",c.id)
+        : sb.from("issue_categories").insert(payload);
+
+      const {error}=await query;
+
+      if(error){toast(error.message);return}
+
+      await writeAudit(c ? "category_updated":"category_created","issue_category",c?.id || null,payload);
+      toast(c ? "Category updated.":"Category created.");
+      $("formModal").classList.add("hidden");
+      await refreshAll();
+    });
+
+    $("formModal").classList.remove("hidden");
+  }
+
+  function openWardForm(id=null){
+    if(state.role!=="admin"){
+      toast("Only admins can manage wards.");
+      return;
+    }
+
+    const w=id ? state.wards.find(x=>x.id===id) : null;
+    const municipality=state.municipalities.find(m=>m.code==="MP326") || state.municipalities[0];
+
+    $("formModalTitle").textContent=w ? "Edit ward":"Add ward";
+    $("formModalContent").innerHTML=`
+      <form id="wardForm">
+        <div class="field">
+          <label>Municipality</label>
+          <select id="wardMunicipality">
+            ${state.municipalities.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="field"><label>Ward number</label><input id="wardNumber" type="number" min="1" required value="${w?.ward_number ?? ""}"></div>
+        <div class="field"><label>Ward name / label</label><input id="wardName" value="${esc(w?.name || "")}" placeholder="Optional"></div>
+        <div class="field"><label>Status</label><select id="wardActive"><option value="true">Active</option><option value="false">Inactive</option></select></div>
+        <button class="btn btn-primary wide" type="submit">${w ? "Save ward":"Create ward"}</button>
+      </form>
+    `;
+
+    $("wardMunicipality").value=w?.municipality_id || municipality?.id || "";
+    $("wardActive").value=String(w?.active ?? true);
+
+    $("wardForm").addEventListener("submit",async e=>{
+      e.preventDefault();
+
+      const payload={
+        municipality_id:$("wardMunicipality").value,
+        ward_number:Number($("wardNumber").value),
+        name:$("wardName").value.trim() || null,
+        active:$("wardActive").value==="true"
+      };
+
+      const query=w
+        ? sb.from("wards").update(payload).eq("id",w.id)
+        : sb.from("wards").insert(payload);
+
+      const {error}=await query;
+
+      if(error){toast(error.message);return}
+
+      await writeAudit(w ? "ward_updated":"ward_created","ward",w?.id || null,payload);
+      toast(w ? "Ward updated.":"Ward created.");
+      $("formModal").classList.add("hidden");
+      await refreshAll();
+    });
+
+    $("formModal").classList.remove("hidden");
+  }
+
+  async function writeAudit(action,entityType,entityId,metadata={}){
+    try{
+      await sb.from("audit_logs").insert({
+        actor_id:state.user.id,
+        action,
+        entity_type:entityType,
+        entity_id:entityId,
+        metadata
+      });
+    }catch(e){
+      console.warn("Audit write skipped",e);
+    }
+  }
+
+  function setupRealtime(){
+    leaveRealtime();
+
+    state.realtimeChannel=sb
+      .channel("cm-civic-admin-live")
+      .on("postgres_changes",{event:"*",schema:"public",table:"reports"},async()=>{await loadReports();renderAll()})
+      .on("postgres_changes",{event:"*",schema:"public",table:"report_status_history"},async()=>{await loadReports();renderAll()})
+      .on("postgres_changes",{event:"*",schema:"public",table:"report_images"},async()=>{await loadReports();renderAll()})
+      .on("postgres_changes",{event:"*",schema:"public",table:"notifications"},async()=>{await loadNotifications();renderNotifications();renderNavCounts()})
+      .on("postgres_changes",{event:"*",schema:"public",table:"profiles"},async()=>{await loadResidentsAndRoles();renderAll()})
+      .on("postgres_changes",{event:"*",schema:"public",table:"user_roles"},async()=>{await loadResidentsAndRoles();renderAll()})
+      .subscribe();
+  }
+
+  function leaveRealtime(){
+    if(state.realtimeChannel){
+      sb.removeChannel(state.realtimeChannel);
+      state.realtimeChannel=null;
+    }
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

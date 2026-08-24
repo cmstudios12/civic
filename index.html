@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#f5f7f6" />
+  <title>CM Civic — Mbombela Community Service Reporting</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIINfQ3yn5Z2v3J9+3ie7gzbQZpmT10nEqQ="
+    crossorigin=""/>
+
+  <style>
+    :root{
+      --bg:#f5f7f9;
+      --surface:#ffffff;
+      --surface-2:#eef2f4;
+      --ink:#15201a;
+      --muted:#6d7972;
+      --line:#dfe5e1;
+      --brand:#15633f;
+      --brand-dark:#0d4e31;
+      --brand-soft:#e6f3eb;
+      --danger:#b42318;
+      --danger-soft:#feeceb;
+      --warning:#9a6700;
+      --warning-soft:#fff4d6;
+      --info:#175cd3;
+      --info-soft:#eaf2ff;
+      --shadow:0 16px 40px rgba(21,32,26,.08);
+      --radius:22px;
+      --radius-sm:14px;
+      --bottom-nav:78px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:"Manrope",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      -webkit-font-smoothing:antialiased;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer}
+    img{max-width:100%;display:block}
+    .hidden{display:none!important}
+    .app-shell{min-height:100dvh}
+    .screen{min-height:100dvh;padding-bottom:calc(var(--bottom-nav) + 24px)}
+    .content{width:min(100%,760px);margin:0 auto;padding:0 18px}
+
+    .topbar{
+      position:sticky;top:0;z-index:40;
+      background:rgba(255,255,255,.96);
+      border-bottom:1px solid var(--line);
+      backdrop-filter:saturate(150%) blur(10px);
+    }
+    .topbar-inner{
+      height:72px;display:flex;align-items:center;justify-content:space-between;
+      width:min(100%,760px);margin:0 auto;padding:0 18px;
+    }
+    .brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.4px}
+    .brand-mark{
+      width:38px;height:38px;border-radius:12px;background:var(--brand);
+      display:grid;place-items:center;color:white;font-weight:800;
+    }
+    .icon-btn{
+      width:42px;height:42px;border:1px solid var(--line);background:var(--surface);
+      border-radius:13px;display:grid;place-items:center;color:var(--ink);
+      position:relative;
+    }
+    .notification-dot{
+      position:absolute;width:9px;height:9px;border-radius:50%;
+      background:#d92d20;top:7px;right:7px;border:2px solid white;
+    }
+
+    .hero{
+      background:var(--surface);
+      border-bottom:1px solid var(--line);
+      padding:24px 0 28px;
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:7px;
+      background:var(--brand-soft);color:var(--brand-dark);
+      font-size:12px;font-weight:800;padding:7px 10px;border-radius:999px;
+      text-transform:uppercase;letter-spacing:.5px;
+    }
+    h1,h2,h3,p{margin-top:0}
+    .hero h1{
+      font-size:clamp(29px,7vw,44px);
+      line-height:1.05;letter-spacing:-1.6px;margin:15px 0 10px;
+    }
+    .hero p{color:var(--muted);line-height:1.65;margin-bottom:20px}
+    .primary-btn,.secondary-btn,.danger-btn{
+      border:none;border-radius:15px;padding:14px 17px;font-weight:800;
+      display:inline-flex;align-items:center;justify-content:center;gap:9px;
+      min-height:50px;
+    }
+    .primary-btn{background:var(--brand);color:#fff}
+    .primary-btn:hover{background:var(--brand-dark)}
+    .secondary-btn{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+    .danger-btn{background:var(--danger-soft);color:var(--danger)}
+    .wide{width:100%}
+    .hero-actions{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
+
+    .section{padding:24px 0}
+    .section-title{
+      display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:14px
+    }
+    .section-title h2{font-size:20px;letter-spacing:-.5px;margin:0}
+    .section-title button{border:none;background:none;color:var(--brand);font-weight:800;padding:0}
+
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .stat-card{
+      background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:15px;
+    }
+    .stat-card strong{font-size:23px;display:block;letter-spacing:-.6px}
+    .stat-card span{font-size:11px;color:var(--muted);font-weight:700;line-height:1.3}
+
+    .quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+    .quick-card{
+      background:var(--surface);border:1px solid var(--line);border-radius:18px;
+      padding:17px;text-align:left;
+    }
+    .quick-card .qi{
+      width:42px;height:42px;border-radius:13px;background:var(--brand-soft);
+      color:var(--brand);display:grid;place-items:center;margin-bottom:22px;
+    }
+    .quick-card strong{display:block;font-size:15px;margin-bottom:4px}
+    .quick-card small{color:var(--muted);line-height:1.4}
+
+    .issue-list{display:grid;gap:11px}
+    .issue-card{
+      background:var(--surface);border:1px solid var(--line);border-radius:18px;
+      padding:15px;display:grid;grid-template-columns:56px 1fr auto;gap:13px;align-items:center;
+    }
+    .issue-thumb{
+      width:56px;height:56px;border-radius:14px;background:var(--surface-2);
+      overflow:hidden;display:grid;place-items:center;color:var(--brand);
+    }
+    .issue-thumb img{width:100%;height:100%;object-fit:cover}
+    .issue-main strong{font-size:14px;display:block;margin-bottom:5px}
+    .issue-main .meta{font-size:11px;color:var(--muted);display:flex;gap:7px;flex-wrap:wrap}
+    .status{
+      display:inline-flex;padding:6px 9px;border-radius:999px;font-size:10px;
+      font-weight:800;text-transform:uppercase;letter-spacing:.35px;white-space:nowrap;
+    }
+    .s-submitted,.s-under_review{background:var(--warning-soft);color:var(--warning)}
+    .s-verified,.s-assigned,.s-in_progress{background:var(--info-soft);color:var(--info)}
+    .s-resolved,.s-community_confirmed{background:var(--brand-soft);color:var(--brand)}
+    .s-disputed,.s-invalid{background:var(--danger-soft);color:var(--danger)}
+    .s-duplicate,.s-outside_service_area{background:var(--surface-2);color:var(--muted)}
+
+    .empty{
+      padding:34px 18px;text-align:center;background:var(--surface);
+      border:1px dashed #cbd5cf;border-radius:18px;color:var(--muted)
+    }
+    .empty strong{display:block;color:var(--ink);margin-bottom:5px}
+
+    .bottom-nav{
+      position:fixed;left:0;right:0;bottom:0;z-index:60;
+      background:rgba(255,255,255,.98);border-top:1px solid var(--line);
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    .nav-inner{
+      width:min(100%,760px);margin:0 auto;height:var(--bottom-nav);
+      display:grid;grid-template-columns:repeat(5,1fr);
+    }
+    .nav-btn{
+      border:none;background:none;color:#7a8680;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:4px;font-size:10px;font-weight:700;
+    }
+    .nav-btn.active{color:var(--brand)}
+    .nav-btn.report-nav .nav-circle{
+      width:48px;height:48px;background:var(--brand);color:white;border-radius:17px;
+      display:grid;place-items:center;box-shadow:0 10px 22px rgba(21,99,63,.24);
+      margin-top:-20px;
+    }
+
+    .page-head{
+      background:var(--surface);border-bottom:1px solid var(--line);padding:18px 0;
+    }
+    .page-head h1{font-size:27px;letter-spacing:-1px;margin:0 0 5px}
+    .page-head p{color:var(--muted);margin:0;font-size:13px}
+
+    .form-card{
+      background:var(--surface);border:1px solid var(--line);border-radius:20px;
+      padding:18px;margin-bottom:14px;
+    }
+    .form-card h3{font-size:15px;margin-bottom:15px}
+    .field{margin-bottom:15px}
+    .field:last-child{margin-bottom:0}
+    label{display:block;font-weight:800;font-size:12px;margin-bottom:7px}
+    input,textarea,select{
+      width:100%;border:1px solid #ccd5cf;border-radius:14px;
+      background:#fff;color:var(--ink);padding:13px 14px;outline:none;font-size:16px;
+    }
+    input:focus,textarea:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+    textarea{min-height:110px;resize:vertical}
+    .hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+    .category-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+    .category-option{
+      border:1px solid var(--line);background:white;border-radius:14px;padding:13px;
+      display:flex;align-items:center;gap:10px;text-align:left;font-weight:700;font-size:12px;
+    }
+    .category-option.selected{
+      border-color:var(--brand);background:var(--brand-soft);color:var(--brand-dark)
+    }
+    .cat-icon{width:34px;height:34px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center}
+    .category-option.selected .cat-icon{background:white}
+
+    .photo-input{
+      border:1px dashed #aebbb3;border-radius:16px;padding:18px;text-align:center;background:#fbfcfb;
+    }
+    .photo-input input{display:none}
+    .photo-previews{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+    .preview{aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--surface-2);position:relative}
+    .preview img{width:100%;height:100%;object-fit:cover}
+    .preview button{
+      position:absolute;right:5px;top:5px;border:none;background:rgba(0,0,0,.72);color:white;
+      width:25px;height:25px;border-radius:50%;
+    }
+
+    .location-box{
+      padding:14px;border-radius:14px;background:var(--surface-2);display:flex;gap:12px;align-items:flex-start
+    }
+    .location-box strong{font-size:13px}
+    .location-box p{font-size:11px;color:var(--muted);margin:3px 0 0;line-height:1.45}
+    #map,#communityMap{height:330px;border-radius:18px;border:1px solid var(--line);overflow:hidden}
+    #reportLocationMap{height:230px;border-radius:16px;border:1px solid var(--line);margin-top:12px}
+
+    .auth-wrap{
+      min-height:100dvh;display:grid;grid-template-rows:auto 1fr;
+      background:var(--surface);
+    }
+    .auth-brand{padding:24px 20px}
+    .auth-card{
+      align-self:end;background:var(--bg);border-top:1px solid var(--line);
+      border-radius:30px 30px 0 0;padding:28px 20px calc(32px + env(safe-area-inset-bottom));
+    }
+    .auth-inner{width:min(100%,460px);margin:0 auto}
+    .auth-card h1{font-size:31px;letter-spacing:-1.3px;margin-bottom:8px}
+    .auth-card>div>p{color:var(--muted);line-height:1.6;margin-bottom:22px}
+    .segmented{
+      display:grid;grid-template-columns:1fr 1fr;background:#e5ebe7;padding:4px;border-radius:14px;margin-bottom:20px
+    }
+    .segmented button{
+      border:none;background:transparent;padding:11px;border-radius:11px;font-weight:800;color:var(--muted)
+    }
+    .segmented button.active{background:white;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.05)}
+
+    .notice{
+      padding:12px 14px;border-radius:13px;font-size:12px;line-height:1.5;margin-bottom:14px;
+      background:var(--info-soft);color:#1849a9;
+    }
+    .notice.error{background:var(--danger-soft);color:var(--danger)}
+    .notice.success{background:var(--brand-soft);color:var(--brand-dark)}
+
+    .modal{
+      position:fixed;inset:0;z-index:100;background:rgba(9,18,13,.46);
+      display:grid;align-items:end;padding-top:50px;
+    }
+    .modal-sheet{
+      background:white;border-radius:28px 28px 0 0;max-height:92dvh;overflow:auto;
+      padding:10px 0 calc(22px + env(safe-area-inset-bottom));
+      box-shadow:var(--shadow);
+    }
+    .sheet-handle{width:46px;height:5px;border-radius:999px;background:#d8dfda;margin:4px auto 18px}
+    .sheet-inner{width:min(100%,760px);margin:0 auto;padding:0 18px}
+    .detail-title{font-size:25px;letter-spacing:-.8px;margin-bottom:7px}
+    .detail-ref{font-size:12px;color:var(--muted);margin-bottom:16px}
+    .timeline{position:relative;padding-left:22px}
+    .timeline:before{
+      content:"";position:absolute;left:6px;top:5px;bottom:10px;width:2px;background:var(--line)
+    }
+    .timeline-item{position:relative;padding:0 0 18px 14px}
+    .timeline-item:before{
+      content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:var(--brand);
+      left:-21px;top:4px;border:3px solid white;box-shadow:0 0 0 1px var(--brand)
+    }
+    .timeline-item strong{font-size:13px;display:block}
+    .timeline-item span{font-size:11px;color:var(--muted)}
+
+    .toast{
+      position:fixed;z-index:999;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);
+      width:min(calc(100% - 32px),430px);background:#101914;color:white;border-radius:14px;
+      padding:13px 15px;font-size:12px;font-weight:700;opacity:0;pointer-events:none;
+      transition:.25s ease;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .loader{
+      width:18px;height:18px;border:2px solid rgba(255,255,255,.45);
+      border-top-color:white;border-radius:50%;animation:spin .8s linear infinite
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .profile-card{
+      background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px
+    }
+    .avatar{
+      width:66px;height:66px;border-radius:20px;background:var(--brand-soft);
+      color:var(--brand);display:grid;place-items:center;font-size:21px;font-weight:800;margin-bottom:12px
+    }
+    .profile-card h2{font-size:20px;margin-bottom:3px}
+    .profile-card p{font-size:12px;color:var(--muted)}
+    .menu-list{display:grid;gap:9px;margin-top:14px}
+    .menu-row{
+      width:100%;background:white;border:1px solid var(--line);border-radius:15px;
+      padding:14px;text-align:left;display:flex;justify-content:space-between;align-items:center;font-weight:700
+    }
+
+    .legal-note{
+      font-size:10px;color:var(--muted);line-height:1.55;padding:15px;background:#f8faf9;border-radius:14px;
+      border:1px solid var(--line);margin-top:15px
+    }
+
+    @media(min-width:700px){
+      body{background:#edf1ee}
+      .app-shell{width:min(100%,760px);margin:0 auto;background:var(--bg);box-shadow:0 0 80px rgba(0,0,0,.06)}
+      .bottom-nav{left:50%;right:auto;transform:translateX(-50%);width:min(100%,760px)}
+      .modal{align-items:center;padding:30px}
+      .modal-sheet{width:min(100%,700px);border-radius:28px;max-height:88dvh}
+      .quick-grid{grid-template-columns:repeat(4,1fr)}
+    }
+  
+
+    /* =========================================================
+       CM CIVIC 2.0 — PROFESSIONAL RESIDENT EXPERIENCE
+       Clean civic UI. No glassmorphism.
+       ========================================================= */
+    :root{
+      --bg:#f4f7f5;
+      --surface:#ffffff;
+      --surface-2:#eef3f0;
+      --surface-3:#e5ece8;
+      --ink:#102018;
+      --muted:#68766e;
+      --line:#d9e2dc;
+      --brand:#0f6a42;
+      --brand-dark:#094c2f;
+      --brand-soft:#e5f3eb;
+      --danger:#b42318;
+      --danger-soft:#feeceb;
+      --warning:#946200;
+      --warning-soft:#fff3d6;
+      --info:#175cd3;
+      --info-soft:#eaf2ff;
+      --radius:20px;
+      --shadow:0 16px 42px rgba(16,32,24,.07);
+      --bottom-nav:82px;
+    }
+
+    body{background:var(--bg);color:var(--ink);letter-spacing:-.01em}
+    button,input,textarea,select{font-family:inherit}
+    button{touch-action:manipulation}
+    .content{width:min(100% - 28px,1120px);max-width:none}
+
+    .topbar{
+      background:#fff;
+      border-bottom:1px solid var(--line);
+      box-shadow:none;
+    }
+    .topbar-inner{width:min(100% - 28px,1120px);max-width:none;height:72px}
+    .brand-mark{background:var(--brand);border-radius:13px;box-shadow:none}
+    .brand{font-weight:800;letter-spacing:-.35px}
+    .icon-btn{border:1px solid var(--line);background:#fff;border-radius:13px}
+
+    .hero{
+      padding:32px 0 26px;
+      background:linear-gradient(180deg,#fff 0%,#f5f8f6 100%);
+      border-bottom:1px solid var(--line);
+    }
+    .hero .content{
+      position:relative;
+      overflow:hidden;
+      background:#103c2a;
+      color:#fff;
+      border-radius:28px;
+      padding:30px;
+      box-shadow:0 22px 54px rgba(16,60,42,.16);
+    }
+    .hero .content:after{
+      content:"";
+      position:absolute;
+      width:280px;height:280px;border-radius:50%;
+      right:-100px;top:-110px;
+      border:54px solid rgba(255,255,255,.055);
+      pointer-events:none;
+    }
+    .hero .eyebrow{background:rgba(255,255,255,.12);color:#dff5e8;border:1px solid rgba(255,255,255,.12)}
+    .hero h1{font-size:clamp(34px,7vw,58px);line-height:1;letter-spacing:-2px;margin:16px 0 12px;max-width:650px}
+    .hero p{color:#d6e4dc;max-width:650px;font-size:14px;line-height:1.7}
+    .hero-actions{position:relative;z-index:1;max-width:500px}
+    .hero .primary-btn{background:#fff;color:var(--brand-dark);box-shadow:none}
+    .hero .secondary-btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}
+
+    .section{padding-top:20px}
+    .section-title{margin-bottom:12px}
+    .section-title h2{font-size:18px;letter-spacing:-.5px}
+    .section-title button{color:var(--brand);font-weight:800}
+
+    .stats{gap:10px}
+    .stat-card{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:17px;
+      padding:16px;
+      box-shadow:0 8px 24px rgba(16,32,24,.035);
+    }
+    .stat-card strong{font-size:25px;letter-spacing:-1px}
+    .stat-card span{font-size:10px;font-weight:700;color:var(--muted)}
+
+    .quick-grid{gap:10px}
+    .quick-card{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+      min-height:148px;
+      padding:16px;
+      box-shadow:0 8px 24px rgba(16,32,24,.035);
+      transition:.18s ease;
+    }
+    .quick-card:active{transform:scale(.985)}
+    .quick-card .qi{background:var(--brand-soft);color:var(--brand);border-radius:12px}
+    .quick-card strong{font-size:14px}
+    .quick-card small{font-size:10px}
+
+    .issue-card{
+      border:1px solid var(--line)!important;
+      border-radius:18px!important;
+      box-shadow:0 8px 24px rgba(16,32,24,.035)!important;
+      background:#fff!important;
+    }
+    .page-head{
+      background:#fff;
+      border-bottom:1px solid var(--line);
+      padding:28px 0 20px;
+    }
+    .page-head h1{font-size:30px;letter-spacing:-1.2px;margin-bottom:5px}
+    .page-head p{font-size:12px;color:var(--muted)}
+
+    #communityMap{border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);height:min(64vh,620px)}
+    .profile-card{border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);background:#fff}
+    .avatar{background:var(--brand);box-shadow:none}
+    .menu-row{border-color:var(--line)}
+
+    .bottom-nav{
+      background:#fff;
+      border-top:1px solid var(--line);
+      box-shadow:0 -10px 32px rgba(16,32,24,.055);
+    }
+    .nav-inner{width:min(100%,760px);max-width:none}
+    .nav-btn{color:#748078;font-weight:700}
+    .nav-btn.active{color:var(--brand)}
+    .nav-circle{background:var(--brand);box-shadow:0 9px 22px rgba(15,106,66,.25)}
+
+    .modal{background:rgba(8,18,12,.55)}
+    .modal-sheet{border-radius:28px 28px 0 0;background:#fff}
+    .form-card{border:1px solid var(--line);background:#fff;border-radius:18px;box-shadow:none}
+    input,textarea,select{font-size:16px;border-color:#ccd8d0;background:#fff}
+    input:focus,textarea:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+    .primary-btn{background:var(--brand);box-shadow:none}
+    .primary-btn:hover{background:var(--brand-dark)}
+    .secondary-btn{border-color:var(--line);background:#fff}
+    .category-btn{border-color:var(--line);background:#fff}
+    .category-btn.active{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-dark)}
+    .legal-note{background:#f1f4f2;border:1px solid var(--line);color:var(--muted);border-radius:14px}
+
+    .auth-wrap{background:var(--bg)}
+    .auth-brand{padding-top:28px}
+    .auth-card{border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);background:#fff}
+    .auth-inner{padding:28px}
+    .auth-inner h1{font-size:40px;line-height:1.02;letter-spacing:-1.8px}
+    .segmented{background:var(--surface-2);padding:4px;border-radius:14px}
+    .segmented button.active{background:#fff;color:var(--brand-dark);box-shadow:0 4px 12px rgba(16,32,24,.06)}
+
+    .civic-banner{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:12px;
+      align-items:center;
+      border:1px solid #cfe3d7;
+      background:#eef8f2;
+      padding:14px 16px;
+      border-radius:17px;
+      margin-top:14px;
+    }
+    .civic-banner-icon{width:38px;height:38px;border-radius:12px;background:#fff;color:var(--brand);display:grid;place-items:center;border:1px solid #dbece2}
+    .civic-banner strong{display:block;font-size:12px;margin-bottom:2px}
+    .civic-banner span{display:block;font-size:10px;color:var(--muted);line-height:1.45}
+    .live-pill{font-size:9px;font-weight:900;letter-spacing:.4px;text-transform:uppercase;color:var(--brand-dark);background:#fff;border:1px solid #dbece2;border-radius:999px;padding:6px 8px}
+
+    .how-it-works{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .how-card{border:1px solid var(--line);background:#fff;border-radius:17px;padding:16px;min-height:128px}
+    .how-num{width:28px;height:28px;border-radius:9px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:10px;font-weight:900;margin-bottom:14px}
+    .how-card strong{display:block;font-size:12px;margin-bottom:5px}
+    .how-card span{font-size:10px;color:var(--muted);line-height:1.5}
+
+    @media(min-width:900px){
+      .screen{padding-bottom:105px}
+      .hero{padding-top:42px}
+      .hero .content{padding:46px 48px}
+      .hero-actions{grid-template-columns:1.4fr 1fr}
+      .stats{grid-template-columns:repeat(3,1fr)}
+      .quick-grid{grid-template-columns:repeat(4,1fr)}
+      .bottom-nav{width:640px;left:50%;right:auto;bottom:18px;transform:translateX(-50%);border:1px solid var(--line);border-radius:22px;box-shadow:0 18px 50px rgba(16,32,24,.14)}
+      .nav-inner{height:76px}
+      .modal-sheet{width:min(720px,calc(100% - 40px));max-height:90vh;border-radius:26px;box-shadow:0 24px 80px rgba(0,0,0,.18)}
+      .modal{align-items:center}
+    }
+
+    @media(max-width:560px){
+      .hero .content{padding:24px 20px;border-radius:22px}
+      .hero h1{font-size:38px}
+      .hero-actions{grid-template-columns:1fr 1fr}
+      .how-it-works{grid-template-columns:1fr}
+      .civic-banner{grid-template-columns:auto 1fr}.live-pill{display:none}
+    }
+
+  
+    /* CM CIVIC — FULL REPORTING WORKFLOW */
+    .report-wizard-sheet{max-height:94vh}
+    .wizard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+    .wizard-head .eyebrow{margin-bottom:8px}
+    .wizard-head p{font-size:11px;color:var(--muted);margin:5px 0 0;line-height:1.5}
+    .wizard-progress{margin-bottom:20px}
+    .wizard-progress-bar{height:6px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+    .wizard-progress-bar span{display:block;height:100%;width:20%;background:var(--brand);border-radius:inherit;transition:width .25s ease}
+    .wizard-progress-meta{display:flex;justify-content:space-between;margin-top:7px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+    .wizard-progress-meta strong{color:var(--brand-dark)}
+    .wizard-step{display:none;animation:wizardIn .18s ease}
+    .wizard-step.active{display:block}
+    @keyframes wizardIn{from{opacity:.2;transform:translateX(8px)}to{opacity:1;transform:none}}
+    .step-intro{display:flex;gap:12px;align-items:flex-start;margin-bottom:18px}
+    .step-icon{flex:0 0 34px;width:34px;height:34px;border-radius:11px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:900}
+    .step-intro h3{font-size:16px;margin:1px 0 4px;letter-spacing:-.35px}
+    .step-intro p{font-size:10px;color:var(--muted);line-height:1.5;margin:0}
+    .report-tip{margin-top:16px;padding:12px 13px;border:1px solid #f0d6a5;background:#fff9eb;border-radius:13px;font-size:10px;line-height:1.55;color:#76500a}
+    .report-tip strong{display:block;color:#5f3e00;margin-bottom:2px}
+    .evidence-drop{padding:28px 16px;background:#f8fbf9;border:1.5px dashed #b9cbc0;border-radius:18px}
+    .evidence-counter,.char-row{display:flex;justify-content:space-between;gap:10px;margin-top:7px;font-size:9px;color:var(--muted)}
+    .photo-previews{grid-template-columns:repeat(3,1fr)}
+    .preview{aspect-ratio:1;border-radius:14px;overflow:hidden;border:1px solid var(--line);position:relative}
+    .preview img{width:100%;height:100%;object-fit:cover}
+    .preview button{position:absolute;right:6px;top:6px;width:26px;height:26px;border:0;border-radius:50%;background:#fff;color:var(--danger);font-size:17px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+    .location-box{margin-top:12px;border:1px solid #cfe3d7;background:#f1faf5}
+    .location-ok{width:30px;height:30px;border-radius:10px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:900}
+    .privacy-strip{display:flex;gap:9px;align-items:flex-start;padding:11px 12px;margin-top:12px;border-radius:12px;background:var(--surface-2);color:var(--muted);font-size:9px;line-height:1.5}
+    .optional{font-weight:500;color:var(--muted)}
+    .duplicate-check{margin-top:14px;border:1px solid #f0d6a5;background:#fff9eb;border-radius:15px;padding:13px}
+    .duplicate-check h4{font-size:11px;margin:0 0 4px;color:#664400}
+    .duplicate-check p{font-size:9px;color:#805f1d;line-height:1.5;margin:0 0 10px}
+    .duplicate-item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;background:#fff;border:1px solid #ecdcb8;border-radius:11px}
+    .duplicate-item strong{font-size:10px;display:block}
+    .duplicate-item span{font-size:9px;color:var(--muted)}
+    .duplicate-item button{border:0;background:var(--brand);color:#fff;border-radius:9px;padding:8px 10px;font-size:9px;font-weight:800}
+    .review-card{border:1px solid var(--line);border-radius:17px;overflow:hidden;background:#fff}
+    .review-row{display:grid;grid-template-columns:105px 1fr;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+    .review-row:last-child{border-bottom:0}
+    .review-row span{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.35px}
+    .review-row strong{font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+    .review-images{display:flex;gap:5px}
+    .review-images img{width:42px;height:42px;border-radius:8px;object-fit:cover;border:1px solid var(--line)}
+    .confirm-row{display:flex;align-items:flex-start;gap:10px;padding:14px;margin:14px 0;border:1px solid var(--line);border-radius:14px;background:#fafcfb;cursor:pointer}
+    .confirm-row input{width:18px;height:18px;flex:0 0 18px;margin-top:1px;accent-color:var(--brand)}
+    .confirm-row span{font-size:10px;line-height:1.55;color:#445149}
+    .wizard-actions{position:sticky;bottom:-18px;z-index:5;display:grid;grid-template-columns:1fr 1.6fr;gap:9px;padding:14px 0 4px;margin-top:20px;background:#fff;border-top:1px solid var(--line)}
+    .wizard-actions .hidden{display:none}
+    .report-success{text-align:center;padding:12px 0 8px}
+    .success-mark{width:68px;height:68px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:#fff;font-size:30px;font-weight:900;box-shadow:0 12px 30px rgba(15,106,66,.18)}
+    .report-success h2{font-size:28px;letter-spacing:-1px;margin:9px 0 7px}
+    .report-success>p{font-size:11px;color:var(--muted);line-height:1.6;max-width:430px;margin:0 auto}
+    .reference-box{margin:20px 0;padding:16px;border:1px solid #cfe3d7;background:#eef8f2;border-radius:16px}
+    .reference-box span{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+    .reference-box strong{font-size:21px;color:var(--brand-dark);letter-spacing:.4px}
+    .success-steps{text-align:left;margin-bottom:18px}
+    .success-steps>div{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+    .success-steps b{width:26px;height:26px;flex:0 0 26px;border-radius:8px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:9px}
+    .success-steps strong{display:block;font-size:10px;margin-bottom:2px}
+    .success-steps small{display:block;font-size:9px;color:var(--muted)}
+    #reportAnotherBtn{margin-top:8px}
+    @media(min-width:900px){.report-wizard-sheet{width:min(760px,calc(100% - 40px))}.sheet-inner{padding:28px 32px}.wizard-actions{bottom:-28px}}
+
+  </style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div id="authView" class="auth-wrap hidden">
+  <div class="auth-brand">
+    <div class="brand">
+      <div class="brand-mark">CM</div>
+      <div>CM Civic</div>
+    </div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-inner">
+      <span class="eyebrow">Community reporting</span>
+      <h1>See it. Report it. Track it.</h1>
+      <p>Report public service and infrastructure problems around Mbombela and follow their progress in one place.</p>
+
+      <div class="segmented">
+        <button id="loginTab" class="active" type="button">Sign in</button>
+        <button id="registerTab" type="button">Create account</button>
+      </div>
+
+      <div id="authNotice" class="notice hidden"></div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label>Email address</label>
+          <input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required>
+        </div>
+        <button id="loginBtn" class="primary-btn wide" type="submit">Sign in</button>
+      </form>
+
+      <form id="registerForm" class="hidden">
+        <div class="field">
+          <label>Full name</label>
+          <input id="registerName" type="text" autocomplete="name" placeholder="Name & Surname" minlength="2" required>
+        </div>
+        <div class="field">
+          <label>Email address</label>
+          <input id="registerEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input id="registerPassword" type="password" autocomplete="new-password" placeholder="Minimum 8 characters" minlength="8" required>
+        </div>
+        <button id="registerBtn" class="primary-btn wide" type="submit">Create account</button>
+      </form>
+
+      <div class="legal-note">
+        CM Civic is an independent community reporting platform by CM Technologies. Submitting an issue here does not automatically mean it has been officially lodged with the City of Mbombela.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="appView" class="app-shell hidden">
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">CM</div>
+        <div>CM Civic</div>
+      </div>
+
+      <button id="notificationsTopBtn" class="icon-btn" aria-label="Notifications">
+        <span id="notificationDot" class="notification-dot hidden"></span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="homeScreen" class="screen">
+    <section class="hero">
+      <div class="content">
+        <span class="eyebrow">City of Mbombela</span>
+        <h1 id="welcomeTitle">Good day.</h1>
+        <p>Report roads, water, electricity, waste and other public service problems with evidence — then follow the issue from submission to resolution.</p>
+        <div class="hero-actions">
+          <button class="primary-btn" data-open-report>
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Report a problem
+          </button>
+          <button class="secondary-btn" data-screen="mapScreen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/>
+              <line x1="9" y1="3" x2="9" y2="18"/>
+              <line x1="15" y1="6" x2="15" y2="21"/>
+            </svg>
+            Map
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div class="content">
+      <div class="civic-banner">
+        <div class="civic-banner-icon">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div><strong>Community reporting is live</strong><span>Your report, evidence and status history stay together. Public maps only show approximate report positions.</span></div>
+        <div class="live-pill">Live</div>
+      </div>
+
+      <section class="section">
+        <div class="stats">
+          <div class="stat-card"><strong id="statMine">0</strong><span>My reports</span></div>
+          <div class="stat-card"><strong id="statOpen">0</strong><span>Open nearby</span></div>
+          <div class="stat-card"><strong id="statResolved">0</strong><span>Resolved</span></div>
+        </div>
+      </section>
+
+      <section class="section" style="padding-top:0">
+        <div class="section-title">
+          <h2>Quick actions</h2>
+        </div>
+
+        <div class="quick-grid">
+          <button class="quick-card" data-open-report>
+            <div class="qi">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            </div>
+            <strong>New report</strong>
+            <small>Capture evidence and submit an issue.</small>
+          </button>
+
+          <button class="quick-card" data-screen="myReportsScreen">
+            <div class="qi">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <strong>My reports</strong>
+            <small>Follow everything you reported.</small>
+          </button>
+
+          <button class="quick-card" data-screen="mapScreen">
+            <div class="qi">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/></svg>
+            </div>
+            <strong>Community map</strong>
+            <small>See verified reports around Mbombela.</small>
+          </button>
+
+          <button class="quick-card" data-screen="notificationsScreen">
+            <div class="qi">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg>
+            </div>
+            <strong>Updates</strong>
+            <small>Check changes on your reports.</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="section" style="padding-top:0">
+        <div class="section-title"><h2>How CM Civic works</h2></div>
+        <div class="how-it-works">
+          <div class="how-card"><div class="how-num">01</div><strong>Report the issue</strong><span>Choose a category, add evidence and capture the problem location.</span></div>
+          <div class="how-card"><div class="how-num">02</div><strong>It gets reviewed</strong><span>The operations team can verify, prioritise and update the report.</span></div>
+          <div class="how-card"><div class="how-num">03</div><strong>Track progress</strong><span>Follow status changes and receive updates from your CM Civic account.</span></div>
+        </div>
+      </section>
+
+      <section class="section" style="padding-top:0">
+        <div class="section-title">
+          <h2>Recent community reports</h2>
+          <button data-screen="mapScreen">View map</button>
+        </div>
+        <div id="recentReports" class="issue-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <main id="myReportsScreen" class="screen hidden">
+    <section class="page-head">
+      <div class="content">
+        <h1>My reports</h1>
+        <p>Every issue you have submitted and its current status.</p>
+      </div>
+    </section>
+    <div class="content">
+      <section class="section">
+        <div id="myReportsList" class="issue-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <main id="mapScreen" class="screen hidden">
+    <section class="page-head">
+      <div class="content">
+        <h1>Community map</h1>
+        <p>Explore verified public service reports around Mbombela using privacy-safe approximate locations.</p>
+      </div>
+    </section>
+    <div class="content">
+      <section class="section">
+        <div id="communityMap"></div>
+        <div class="legal-note">
+          Map pins use the public, approximate position of reports — not a resident's private exact GPS coordinates.
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <main id="notificationsScreen" class="screen hidden">
+    <section class="page-head">
+      <div class="content">
+        <h1>Updates</h1>
+        <p>Realtime status changes and activity connected to your reports.</p>
+      </div>
+    </section>
+    <div class="content">
+      <section class="section">
+        <div id="notificationsList" class="issue-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <main id="profileScreen" class="screen hidden">
+    <section class="page-head">
+      <div class="content">
+        <h1>Profile</h1>
+        <p>Your CM Civic community account.</p>
+      </div>
+    </section>
+    <div class="content">
+      <section class="section">
+        <div class="profile-card">
+          <div id="profileAvatar" class="avatar">CM</div>
+          <h2 id="profileName">Resident</h2>
+          <p id="profileEmail"></p>
+
+          <div class="stats" style="margin-top:18px">
+            <div class="stat-card"><strong id="profileReports">0</strong><span>Reports</span></div>
+            <div class="stat-card"><strong id="profileVerified">0</strong><span>Verified</span></div>
+            <div class="stat-card"><strong id="profileTrust">50</strong><span>Trust score</span></div>
+          </div>
+
+          <div class="menu-list">
+            <button id="refreshBtn" class="menu-row"><span>Refresh data</span><span>↻</span></button>
+            <button id="logoutBtn" class="menu-row" style="color:var(--danger)"><span>Sign out</span><span>→</span></button>
+          </div>
+
+          <div class="legal-note">
+            CM Civic is currently an independent community platform. A report is not an official City of Mbombela municipal reference unless a future official integration explicitly says so.
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <div class="nav-inner">
+      <button class="nav-btn active" data-screen="homeScreen" data-nav="homeScreen">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-5v-7h-4v7H5a2 2 0 0 1-2-2z"/></svg>
+        Home
+      </button>
+
+      <button class="nav-btn" data-screen="myReportsScreen" data-nav="myReportsScreen">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Reports
+      </button>
+
+      <button class="nav-btn report-nav" data-open-report>
+        <span class="nav-circle">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+        </span>
+        Report
+      </button>
+
+      <button class="nav-btn" data-screen="mapScreen" data-nav="mapScreen">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/></svg>
+        Map
+      </button>
+
+      <button class="nav-btn" data-screen="profileScreen" data-nav="profileScreen">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        Profile
+      </button>
+    </div>
+  </nav>
+</div>
+
+
+<div id="reportModal" class="modal hidden">
+  <div class="modal-sheet report-wizard-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-inner">
+      <div class="wizard-head">
+        <div>
+          <span class="eyebrow">New service report</span>
+          <h2 class="detail-title">Report a problem</h2>
+          <p id="wizardSubtitle">Tell us what needs attention. You can review everything before sending.</p>
+        </div>
+        <button id="closeReportModal" class="icon-btn" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="wizard-progress">
+        <div class="wizard-progress-bar"><span id="wizardProgressBar"></span></div>
+        <div class="wizard-progress-meta"><strong id="wizardStepLabel">Step 1 of 5</strong><span id="wizardStepName">Issue</span></div>
+      </div>
+
+      <div id="reportNotice" class="notice hidden"></div>
+
+      <form id="reportForm" novalidate>
+        <section class="wizard-step active" data-step="1">
+          <div class="step-intro">
+            <div class="step-icon">1</div>
+            <div><h3>What is the problem?</h3><p>Choose the category that best describes the service issue.</p></div>
+          </div>
+          <div id="categoryGrid" class="category-grid"></div>
+          <input id="selectedCategory" type="hidden">
+          <div class="report-tip"><strong>Safety first.</strong> CM Civic is for service and infrastructure reporting. For an immediate danger or emergency, use the appropriate emergency service instead of waiting for a report review.</div>
+        </section>
+
+        <section class="wizard-step" data-step="2">
+          <div class="step-intro">
+            <div class="step-icon">2</div>
+            <div><h3>Add evidence</h3><p>Clear photos help reviewers understand and verify the problem.</p></div>
+          </div>
+
+          <label class="photo-input evidence-drop" for="reportPhotos">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <strong>Take a photo or choose from gallery</strong>
+            <div class="hint">Add up to 3 images. Avoid faces, number plates or private information when they are not necessary.</div>
+            <input id="reportPhotos" type="file" accept="image/*" capture="environment" multiple>
+          </label>
+          <div class="evidence-counter"><span id="photoCount">0 of 3 photos</span><span>Optional, but recommended</span></div>
+          <div id="photoPreviews" class="photo-previews"></div>
+        </section>
+
+        <section class="wizard-step" data-step="3">
+          <div class="step-intro">
+            <div class="step-icon">3</div>
+            <div><h3>Where is the problem?</h3><p>Use GPS, then drag the pin if the issue is a few metres away from you.</p></div>
+          </div>
+
+          <button id="detectLocationBtn" class="primary-btn wide" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 1-7 7M5 12a7 7 0 0 1 7-7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+            </svg>
+            Detect my location
+          </button>
+
+          <div id="locationResult" class="location-box hidden">
+            <div class="location-ok">✓</div>
+            <div><strong>Location captured</strong><p id="locationText">Waiting for GPS…</p></div>
+          </div>
+          <div id="reportLocationMap" class="hidden"></div>
+
+          <div class="field" style="margin-top:14px">
+            <label>Area / landmark <span class="optional">optional</span></label>
+            <input id="reportLocationLabel" type="text" maxlength="120" placeholder="e.g. Riverside, near the shopping centre">
+            <div class="hint">This helps people understand the area without publishing your exact GPS.</div>
+          </div>
+
+          <div id="duplicateCheck" class="duplicate-check hidden"></div>
+          <div class="privacy-strip">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Your exact GPS is stored privately. The community map uses an approximate position.</span>
+          </div>
+        </section>
+
+        <section class="wizard-step" data-step="4">
+          <div class="step-intro">
+            <div class="step-icon">4</div>
+            <div><h3>Describe what is happening</h3><p>Keep it factual and useful for the team reviewing the report.</p></div>
+          </div>
+
+          <div class="field">
+            <label>Short title</label>
+            <input id="reportTitle" type="text" maxlength="100" placeholder="e.g. Large pothole blocking left lane">
+            <div class="char-row"><span>Be specific</span><span id="titleCount">0/100</span></div>
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea id="reportDescription" maxlength="1000" placeholder="What happened? How long has it been there? Is traffic, access or a public service affected?"></textarea>
+            <div class="char-row"><span>Do not include passwords or sensitive personal information</span><span id="descriptionCount">0/1000</span></div>
+          </div>
+        </section>
+
+        <section class="wizard-step" data-step="5">
+          <div class="step-intro">
+            <div class="step-icon">5</div>
+            <div><h3>Review your report</h3><p>Check the details below before submitting.</p></div>
+          </div>
+          <div id="reportReview" class="review-card"></div>
+          <label class="confirm-row">
+            <input id="reportDeclaration" type="checkbox">
+            <span>I confirm this report is genuine to the best of my knowledge and the information may be reviewed for community service reporting.</span>
+          </label>
+          <div class="legal-note">CM Civic is an independent community reporting platform. Submission here does not automatically mean the issue has been lodged as an official City of Mbombela municipal complaint unless an official integration is added.</div>
+        </section>
+
+        <div class="wizard-actions">
+          <button id="wizardBackBtn" class="secondary-btn" type="button">Back</button>
+          <button id="wizardNextBtn" class="primary-btn" type="button">Continue</button>
+          <button id="submitReportBtn" class="primary-btn hidden" type="submit">Submit report</button>
+        </div>
+      </form>
+
+      <div id="reportSuccess" class="report-success hidden">
+        <div class="success-mark">✓</div>
+        <span class="eyebrow">Report received</span>
+        <h2>Thank you for speaking up.</h2>
+        <p>Your report has been saved and can now move through the CM Civic review process.</p>
+        <div class="reference-box"><span>Reference number</span><strong id="successReference">—</strong></div>
+        <div class="success-steps">
+          <div><b>1</b><span><strong>Submitted</strong><small>Your report is safely recorded.</small></span></div>
+          <div><b>2</b><span><strong>Review</strong><small>The team can verify and prioritise it.</small></span></div>
+          <div><b>3</b><span><strong>Updates</strong><small>Track changes from My Reports.</small></span></div>
+        </div>
+        <button id="viewSubmittedReportBtn" class="primary-btn wide" type="button">View my report</button>
+        <button id="reportAnotherBtn" class="secondary-btn wide" type="button">Report another problem</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="detailModal" class="modal hidden">
+  <div class="modal-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-inner">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:12px;margin-bottom:18px">
+        <div>
+          <span id="detailStatus" class="status"></span>
+          <h2 id="detailTitle" class="detail-title" style="margin-top:12px"></h2>
+          <div id="detailRef" class="detail-ref"></div>
+        </div>
+        <button id="closeDetailModal" class="icon-btn" type="button">✕</button>
+      </div>
+
+      <div id="detailDescription" style="font-size:13px;line-height:1.65;color:var(--muted);margin-bottom:18px"></div>
+
+      <div class="form-card">
+        <h3>Report timeline</h3>
+        <div id="detailTimeline" class="timeline"></div>
+      </div>
+
+      <button id="supportReportBtn" class="secondary-btn wide hidden" type="button">I'm also affected</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""></script>
+
+<script>
+(() => {
+  "use strict";
+
+  const SUPABASE_URL = "https://whfqhhdtvftfbwojhasq.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EqPFSmCfv5GHgbDCELgIQw_MgqbQfhk";
+
+  const sb = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  );
+
+  const state = {
+    user: null,
+    profile: null,
+    role: "resident",
+    categories: [],
+    municipality: null,
+    myReports: [],
+    publicReports: [],
+    notifications: [],
+    selectedPhotos: [],
+    location: null,
+    reportMap: null,
+    reportMarker: null,
+    communityMap: null,
+    communityMarkers: [],
+    detailReport: null,
+    realtimeChannel: null,
+    reportStep: 1,
+    submittedReportId: null
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+  function escapeHtml(value = "") {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function niceStatus(status = "") {
+    return status.replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function formatDate(date) {
+    if (!date) return "";
+    return new Intl.DateTimeFormat("en-ZA", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(new Date(date));
+  }
+
+  function initials(name = "Resident") {
+    return name.trim().split(/\s+/).slice(0,2).map(p => p[0]?.toUpperCase()).join("") || "CM";
+  }
+
+  let toastTimer;
+  function toast(message) {
+    const el = $("toast");
+    el.textContent = message;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 3400);
+  }
+
+  function setNotice(id, message = "", type = "") {
+    const el = $(id);
+    if (!message) {
+      el.className = "notice hidden";
+      el.textContent = "";
+      return;
+    }
+    el.className = `notice ${type}`.trim();
+    el.textContent = message;
+  }
+
+  function setButtonLoading(button, loading, label) {
+    if (!button) return;
+    if (loading) {
+      button.dataset.oldText = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = `<span class="loader"></span>${escapeHtml(label || "Working...")}`;
+    } else {
+      button.disabled = false;
+      button.innerHTML = button.dataset.oldText || label || "Continue";
+    }
+  }
+
+  async function boot() {
+    bindUI();
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user) {
+      await enterApp(session.user);
+    } else {
+      showAuth();
+    }
+
+    sb.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        await enterApp(session.user);
+      }
+      if (event === "SIGNED_OUT") {
+        leaveRealtime();
+        showAuth();
+      }
+    });
+  }
+
+  function bindUI() {
+    $("loginTab").addEventListener("click", () => setAuthMode("login"));
+    $("registerTab").addEventListener("click", () => setAuthMode("register"));
+    $("loginForm").addEventListener("submit", login);
+    $("registerForm").addEventListener("submit", register);
+
+    $$("[data-screen]").forEach(btn => {
+      btn.addEventListener("click", () => showScreen(btn.dataset.screen));
+    });
+
+    $$("[data-open-report]").forEach(btn => {
+      btn.addEventListener("click", openReportModal);
+    });
+
+    $("notificationsTopBtn").addEventListener("click", () => showScreen("notificationsScreen"));
+    $("closeReportModal").addEventListener("click", closeReportModal);
+    $("closeDetailModal").addEventListener("click", () => $("detailModal").classList.add("hidden"));
+
+    $("reportPhotos").addEventListener("change", handlePhotoSelection);
+    $("detectLocationBtn").addEventListener("click", detectLocation);
+    $("reportForm").addEventListener("submit", submitReport);
+    $("wizardBackBtn").addEventListener("click", () => changeReportStep(-1));
+    $("wizardNextBtn").addEventListener("click", () => changeReportStep(1));
+    $("reportTitle").addEventListener("input", updateReportCounters);
+    $("reportDescription").addEventListener("input", updateReportCounters);
+    $("reportLocationLabel").addEventListener("input", checkPossibleDuplicates);
+    $("viewSubmittedReportBtn").addEventListener("click", () => {
+      closeReportModal();
+      showScreen("myReportsScreen");
+      if (state.submittedReportId) setTimeout(() => openReportDetails(state.submittedReportId), 250);
+    });
+    $("reportAnotherBtn").addEventListener("click", () => {
+      resetReportForm();
+      $("reportSuccess").classList.add("hidden");
+      $("reportForm").classList.remove("hidden");
+      document.querySelector(".wizard-progress")?.classList.remove("hidden");
+      goToReportStep(1);
+    });
+
+    $("logoutBtn").addEventListener("click", async () => {
+      await sb.auth.signOut();
+    });
+
+    $("refreshBtn").addEventListener("click", async () => {
+      await loadAll();
+      toast("CM Civic data refreshed.");
+    });
+
+    $("supportReportBtn").addEventListener("click", supportCurrentReport);
+
+    $("reportModal").addEventListener("click", (e) => {
+      if (e.target === $("reportModal")) closeReportModal();
+    });
+
+    $("detailModal").addEventListener("click", (e) => {
+      if (e.target === $("detailModal")) $("detailModal").classList.add("hidden");
+    });
+  }
+
+  function setAuthMode(mode) {
+    const login = mode === "login";
+    $("loginTab").classList.toggle("active", login);
+    $("registerTab").classList.toggle("active", !login);
+    $("loginForm").classList.toggle("hidden", !login);
+    $("registerForm").classList.toggle("hidden", login);
+    setNotice("authNotice");
+  }
+
+  async function login(e) {
+    e.preventDefault();
+    const btn = $("loginBtn");
+    setButtonLoading(btn, true, "Signing in...");
+    setNotice("authNotice");
+
+    const email = $("loginEmail").value.trim();
+    const password = $("loginPassword").value;
+
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+
+    setButtonLoading(btn, false);
+    if (error) setNotice("authNotice", error.message, "error");
+  }
+
+  async function register(e) {
+    e.preventDefault();
+    const btn = $("registerBtn");
+    setButtonLoading(btn, true, "Creating account...");
+    setNotice("authNotice");
+
+    const full_name = $("registerName").value.trim();
+    const email = $("registerEmail").value.trim();
+    const password = $("registerPassword").value;
+
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name }
+      }
+    });
+
+    setButtonLoading(btn, false);
+
+    if (error) {
+      setNotice("authNotice", error.message, "error");
+      return;
+    }
+
+    if (!data.session) {
+      setNotice("authNotice", "Account created. Check your email to confirm your address, then sign in.", "success");
+      setAuthMode("login");
+      $("loginEmail").value = email;
+    } else {
+      setNotice("authNotice", "Account created successfully.", "success");
+    }
+  }
+
+  function showAuth() {
+    state.user = null;
+    $("appView").classList.add("hidden");
+    $("authView").classList.remove("hidden");
+  }
+
+  async function enterApp(user) {
+    state.user = user;
+    $("authView").classList.add("hidden");
+    $("appView").classList.remove("hidden");
+
+    await loadAll();
+    setupRealtime();
+    showScreen("homeScreen");
+  }
+
+  async function loadAll() {
+    await Promise.all([
+      loadProfile(),
+      loadCategories(),
+      loadMunicipality(),
+      loadMyReports(),
+      loadPublicReports(),
+      loadNotifications()
+    ]);
+
+    renderEverything();
+  }
+
+  async function loadProfile() {
+    const [{ data: profile }, { data: roleRow }] = await Promise.all([
+      sb.from("profiles").select("*").eq("id", state.user.id).maybeSingle(),
+      sb.from("user_roles").select("role").eq("user_id", state.user.id).maybeSingle()
+    ]);
+
+    state.profile = profile || {
+      full_name: state.user.user_metadata?.full_name || "Resident",
+      reports_submitted: 0,
+      reports_verified: 0,
+      trust_score: 50
+    };
+    state.role = roleRow?.role || "resident";
+  }
+
+  async function loadCategories() {
+    const { data, error } = await sb
+      .from("issue_categories")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order");
+
+    if (!error) state.categories = data || [];
+  }
+
+  async function loadMunicipality() {
+    const { data } = await sb
+      .from("municipalities")
+      .select("*")
+      .eq("code", "MP326")
+      .maybeSingle();
+
+    state.municipality = data || null;
+  }
+
+  async function loadMyReports() {
+    const { data, error } = await sb
+      .from("reports")
+      .select(`
+        *,
+        issue_categories(name, slug),
+        report_images(id, object_path, image_type)
+      `)
+      .eq("reporter_id", state.user.id)
+      .order("created_at", { ascending: false });
+
+    if (!error) state.myReports = data || [];
+  }
+
+  async function loadPublicReports() {
+    const { data, error } = await sb
+      .from("reports")
+      .select(`
+        id,
+        reference_number,
+        title,
+        description,
+        status,
+        priority,
+        public_location_label,
+        public_latitude,
+        public_longitude,
+        support_count,
+        reporter_id,
+        created_at,
+        issue_categories(name, slug)
+      `)
+      .eq("is_public", true)
+      .eq("is_hidden", false)
+      .not("status", "in", '("submitted","under_review","invalid")')
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (!error) state.publicReports = data || [];
+  }
+
+  async function loadNotifications() {
+    const { data, error } = await sb
+      .from("notifications")
+      .select("*")
+      .eq("user_id", state.user.id)
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (!error) state.notifications = data || [];
+  }
+
+  function renderEverything() {
+    renderProfile();
+    renderCategories();
+    renderMyReports();
+    renderRecentReports();
+    renderNotifications();
+    renderStats();
+
+    if (!$("mapScreen").classList.contains("hidden")) renderCommunityMap();
+  }
+
+  function renderProfile() {
+    const name = state.profile?.full_name || state.user?.user_metadata?.full_name || "Resident";
+    const first = name.split(/\s+/)[0] || "there";
+
+    $("welcomeTitle").textContent = `Hello, ${first}.`;
+    $("profileName").textContent = name;
+    $("profileEmail").textContent = state.user?.email || "";
+    $("profileAvatar").textContent = initials(name);
+    $("profileReports").textContent = state.profile?.reports_submitted ?? state.myReports.length;
+    $("profileVerified").textContent = state.profile?.reports_verified ?? 0;
+    $("profileTrust").textContent = state.profile?.trust_score ?? 50;
+  }
+
+  function renderCategories() {
+    const grid = $("categoryGrid");
+    if (!state.categories.length) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><strong>No categories found</strong>Run the CM Civic V1 SQL first.</div>`;
+      return;
+    }
+
+    grid.innerHTML = state.categories.map(cat => `
+      <button class="category-option" type="button" data-category-id="${cat.id}">
+        <span class="cat-icon">${categorySymbol(cat.slug)}</span>
+        <span>${escapeHtml(cat.name)}</span>
+      </button>
+    `).join("");
+
+    grid.querySelectorAll("[data-category-id]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        grid.querySelectorAll(".category-option").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        $("selectedCategory").value = btn.dataset.categoryId;
+        checkPossibleDuplicates();
+      });
+    });
+  }
+
+  function categorySymbol(slug) {
+    const icons = {
+      roads:"◫", water:"◒", electricity:"ϟ", streetlights:"◉", waste:"⌫",
+      sewerage:"≈", traffic:"△", stormwater:"≋", "public-spaces":"⌂", other:"?"
+    };
+    return icons[slug] || "•";
+  }
+
+  function reportCard(report, own = false) {
+    const cat = report.issue_categories?.name || "Issue";
+    return `
+      <button class="issue-card" data-report-id="${report.id}" data-own="${own ? "1":"0"}" style="width:100%;text-align:left">
+        <div class="issue-thumb">${categorySymbol(report.issue_categories?.slug)}</div>
+        <div class="issue-main">
+          <strong>${escapeHtml(report.title)}</strong>
+          <div class="meta">
+            <span>${escapeHtml(cat)}</span>
+            <span>•</span>
+            <span>${escapeHtml(report.public_location_label || "Mbombela")}</span>
+            ${report.support_count ? `<span>• ${report.support_count} affected</span>` : ""}
+          </div>
+        </div>
+        <span class="status s-${report.status}">${escapeHtml(niceStatus(report.status))}</span>
+      </button>
+    `;
+  }
+
+  function wireReportCards(container) {
+    container.querySelectorAll("[data-report-id]").forEach(btn => {
+      btn.addEventListener("click", () => openReportDetails(btn.dataset.reportId));
+    });
+  }
+
+  function renderMyReports() {
+    const el = $("myReportsList");
+    if (!state.myReports.length) {
+      el.innerHTML = `<div class="empty"><strong>No reports yet</strong>Your first community report will appear here.</div>`;
+      return;
+    }
+    el.innerHTML = state.myReports.map(r => reportCard(r, true)).join("");
+    wireReportCards(el);
+  }
+
+  function renderRecentReports() {
+    const el = $("recentReports");
+    const reports = state.publicReports.slice(0, 6);
+
+    if (!reports.length) {
+      el.innerHTML = `<div class="empty"><strong>No verified reports yet</strong>Verified community issues will show here.</div>`;
+      return;
+    }
+
+    el.innerHTML = reports.map(r => reportCard(r)).join("");
+    wireReportCards(el);
+  }
+
+  function renderNotifications() {
+    const el = $("notificationsList");
+    const unread = state.notifications.filter(n => !n.read).length;
+    $("notificationDot").classList.toggle("hidden", unread === 0);
+
+    if (!state.notifications.length) {
+      el.innerHTML = `<div class="empty"><strong>No updates yet</strong>Status updates on your reports will appear here.</div>`;
+      return;
+    }
+
+    el.innerHTML = state.notifications.map(n => `
+      <button class="issue-card" style="width:100%;text-align:left" data-notification-id="${n.id}" data-report-id="${n.report_id || ""}">
+        <div class="issue-thumb">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg>
+        </div>
+        <div class="issue-main">
+          <strong>${escapeHtml(n.title)}</strong>
+          <div class="meta"><span>${escapeHtml(n.message)}</span><span>•</span><span>${formatDate(n.created_at)}</span></div>
+        </div>
+        ${n.read ? "" : `<span class="status s-in_progress">New</span>`}
+      </button>
+    `).join("");
+
+    el.querySelectorAll("[data-notification-id]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        await sb.from("notifications").update({ read: true }).eq("id", btn.dataset.notificationId);
+        await loadNotifications();
+        renderNotifications();
+        if (btn.dataset.reportId) openReportDetails(btn.dataset.reportId);
+      });
+    });
+  }
+
+  function renderStats() {
+    $("statMine").textContent = state.myReports.length;
+    $("statOpen").textContent = state.publicReports.filter(r => !["resolved","community_confirmed"].includes(r.status)).length;
+    $("statResolved").textContent = state.publicReports.filter(r => ["resolved","community_confirmed"].includes(r.status)).length;
+  }
+
+  function showScreen(id) {
+    ["homeScreen","myReportsScreen","mapScreen","notificationsScreen","profileScreen"].forEach(screenId => {
+      $(screenId).classList.toggle("hidden", screenId !== id);
+    });
+
+    $$("[data-nav]").forEach(btn => btn.classList.toggle("active", btn.dataset.nav === id));
+
+    if (id === "mapScreen") {
+      setTimeout(renderCommunityMap, 80);
+    }
+
+    if (id === "notificationsScreen") {
+      markVisibleNotificationsRead();
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function markVisibleNotificationsRead() {
+    const unreadIds = state.notifications.filter(n => !n.read).map(n => n.id);
+    if (!unreadIds.length) return;
+
+    await sb
+      .from("notifications")
+      .update({ read: true })
+      .in("id", unreadIds);
+
+    state.notifications = state.notifications.map(n => ({ ...n, read: true }));
+    renderNotifications();
+  }
+
+  function openReportModal() {
+    $("reportModal").classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    $("reportSuccess").classList.add("hidden");
+    $("reportForm").classList.remove("hidden");
+    document.querySelector(".wizard-progress")?.classList.remove("hidden");
+    goToReportStep(state.reportStep || 1);
+  }
+
+  function closeReportModal() {
+    $("reportModal").classList.add("hidden");
+    document.body.style.overflow = "";
+  }
+
+  function goToReportStep(step) {
+    state.reportStep = Math.max(1, Math.min(5, step));
+    $$(".wizard-step").forEach(el => el.classList.toggle("active", Number(el.dataset.step) === state.reportStep));
+    const names = ["Issue", "Evidence", "Location", "Details", "Review"];
+    $("wizardStepLabel").textContent = `Step ${state.reportStep} of 5`;
+    $("wizardStepName").textContent = names[state.reportStep - 1];
+    $("wizardProgressBar").style.width = `${state.reportStep * 20}%`;
+    $("wizardBackBtn").style.visibility = state.reportStep === 1 ? "hidden" : "visible";
+    $("wizardNextBtn").classList.toggle("hidden", state.reportStep === 5);
+    $("submitReportBtn").classList.toggle("hidden", state.reportStep !== 5);
+    setNotice("reportNotice");
+    if (state.reportStep === 3) {
+      setTimeout(() => state.reportMap?.invalidateSize(), 100);
+      checkPossibleDuplicates();
+    }
+    if (state.reportStep === 5) renderReportReview();
+    document.querySelector(".report-wizard-sheet")?.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function validateReportStep(step) {
+    if (step === 1 && !$("selectedCategory").value) {
+      setNotice("reportNotice", "Choose the type of problem before continuing.", "error");
+      return false;
+    }
+    if (step === 3 && !state.location) {
+      setNotice("reportNotice", "Capture the problem location before continuing.", "error");
+      return false;
+    }
+    if (step === 4 && !$("reportTitle").value.trim()) {
+      setNotice("reportNotice", "Add a short, clear title for the problem.", "error");
+      $("reportTitle").focus();
+      return false;
+    }
+    return true;
+  }
+
+  function changeReportStep(direction) {
+    if (direction > 0 && !validateReportStep(state.reportStep)) return;
+    goToReportStep(state.reportStep + direction);
+  }
+
+  function updateReportCounters() {
+    $("titleCount").textContent = `${$("reportTitle").value.length}/100`;
+    $("descriptionCount").textContent = `${$("reportDescription").value.length}/1000`;
+  }
+
+  function handlePhotoSelection(e) {
+    const incoming = [...e.target.files];
+    const allowed = incoming.filter(f => f.type.startsWith("image/"));
+    const tooLarge = allowed.filter(f => f.size > 10 * 1024 * 1024);
+    const usable = allowed.filter(f => f.size <= 10 * 1024 * 1024);
+
+    if (tooLarge.length) toast("Some photos were over 10 MB and were not added.");
+    state.selectedPhotos = [...state.selectedPhotos, ...usable].slice(0, 3);
+    renderPhotoPreviews();
+    e.target.value = "";
+  }
+
+  function renderPhotoPreviews() {
+    const el = $("photoPreviews");
+    $("photoCount").textContent = `${state.selectedPhotos.length} of 3 photos`;
+
+    el.innerHTML = state.selectedPhotos.map((file, i) => `
+      <div class="preview">
+        <img src="${URL.createObjectURL(file)}" alt="Selected report evidence ${i + 1}">
+        <button type="button" data-remove-photo="${i}" aria-label="Remove photo">×</button>
+      </div>
+    `).join("");
+
+    el.querySelectorAll("[data-remove-photo]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.selectedPhotos.splice(Number(btn.dataset.removePhoto), 1);
+        renderPhotoPreviews();
+      });
+    });
+  }
+
+  function distanceMetres(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const p1 = lat1 * Math.PI / 180, p2 = lat2 * Math.PI / 180;
+    const dp = (lat2-lat1) * Math.PI / 180, dl = (lon2-lon1) * Math.PI / 180;
+    const a = Math.sin(dp/2)**2 + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+    return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function possibleDuplicates() {
+    if (!state.location || !$("selectedCategory").value) return [];
+    const category = state.categories.find(c => c.id === $("selectedCategory").value);
+    const slug = category?.slug;
+    return state.publicReports
+      .filter(r => r.public_latitude != null && r.public_longitude != null)
+      .map(r => ({...r, distance: distanceMetres(state.location.lat, state.location.lng, Number(r.public_latitude), Number(r.public_longitude))}))
+      .filter(r => r.distance <= 350 && (!slug || r.issue_categories?.slug === slug))
+      .sort((a,b) => a.distance-b.distance)
+      .slice(0,3);
+  }
+
+  function checkPossibleDuplicates() {
+    const box = $("duplicateCheck");
+    const matches = possibleDuplicates();
+    if (!matches.length) {
+      box.classList.add("hidden");
+      box.innerHTML = "";
+      return;
+    }
+    const r = matches[0];
+    box.classList.remove("hidden");
+    box.innerHTML = `
+      <h4>A similar nearby report may already exist</h4>
+      <p>Supporting an existing report can help avoid duplicates while showing that more residents are affected.</p>
+      <div class="duplicate-item">
+        <div><strong>${escapeHtml(r.title)}</strong><span>${escapeHtml(r.reference_number || "")} • about ${Math.max(10, Math.round(r.distance/10)*10)}m away</span></div>
+        <button type="button" data-support-duplicate="${r.id}">I'm also affected</button>
+      </div>`;
+    box.querySelector("[data-support-duplicate]")?.addEventListener("click", async () => {
+      const btn = box.querySelector("[data-support-duplicate]");
+      setButtonLoading(btn, true, "Adding...");
+      const { error } = await sb.from("report_supporters").upsert(
+        {report_id:r.id,user_id:state.user.id},
+        {onConflict:"report_id,user_id",ignoreDuplicates:true}
+      );
+      setButtonLoading(btn, false);
+      if (error) return toast(error.message);
+      toast("Added — you are also affected by this issue.");
+      closeReportModal();
+      await loadAll();
+      showScreen("mapScreen");
+      setTimeout(() => openReportDetails(r.id), 250);
+    });
+  }
+
+  function renderReportReview() {
+    const category = state.categories.find(c => c.id === $("selectedCategory").value);
+    const photos = state.selectedPhotos.map(f => `<img src="${URL.createObjectURL(f)}" alt="">`).join("");
+    $("reportReview").innerHTML = `
+      <div class="review-row"><span>Category</span><strong>${escapeHtml(category?.name || "Not selected")}</strong></div>
+      <div class="review-row"><span>Title</span><strong>${escapeHtml($("reportTitle").value.trim() || "—")}</strong></div>
+      <div class="review-row"><span>Description</span><strong>${escapeHtml($("reportDescription").value.trim() || "No additional description")}</strong></div>
+      <div class="review-row"><span>Area</span><strong>${escapeHtml($("reportLocationLabel").value.trim() || "Mbombela")}</strong></div>
+      <div class="review-row"><span>GPS</span><strong>${state.location ? `${state.location.lat.toFixed(5)}, ${state.location.lng.toFixed(5)} • ±${Math.round(state.location.accuracy || 0)}m` : "Not captured"}</strong></div>
+      <div class="review-row"><span>Evidence</span><strong>${state.selectedPhotos.length ? `<div class="review-images">${photos}</div>` : "No photos attached"}</strong></div>`;
+  }
+
+  async function detectLocation() {
+    const btn = $("detectLocationBtn");
+
+    if (!navigator.geolocation) {
+      setNotice("reportNotice", "This device does not provide browser geolocation.", "error");
+      return;
+    }
+
+    setButtonLoading(btn, true, "Finding location...");
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        state.location = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy: pos.coords.accuracy
+        };
+
+        $("locationResult").classList.remove("hidden");
+        $("locationText").textContent =
+          `${state.location.lat.toFixed(6)}, ${state.location.lng.toFixed(6)} • accuracy ±${Math.round(state.location.accuracy)}m`;
+
+        $("reportLocationMap").classList.remove("hidden");
+
+        if (!state.reportMap) {
+          state.reportMap = L.map("reportLocationMap", {
+            zoomControl: false
+          }).setView([state.location.lat, state.location.lng], 16);
+
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "&copy; OpenStreetMap contributors"
+          }).addTo(state.reportMap);
+        } else {
+          state.reportMap.setView([state.location.lat, state.location.lng], 16);
+        }
+
+        if (state.reportMarker) state.reportMarker.remove();
+        state.reportMarker = L.marker([state.location.lat, state.location.lng], { draggable: true })
+          .addTo(state.reportMap);
+
+        state.reportMarker.on("dragend", () => {
+          const ll = state.reportMarker.getLatLng();
+          state.location.lat = ll.lat;
+          state.location.lng = ll.lng;
+          $("locationText").textContent =
+            `${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)} • pin adjusted manually`;
+        });
+
+        setTimeout(() => state.reportMap.invalidateSize(), 100);
+        setButtonLoading(btn, false);
+        checkPossibleDuplicates();
+      },
+      err => {
+        setButtonLoading(btn, false);
+        const msg = err.code === 1
+          ? "Location permission was denied. Enable location access in your browser and try again."
+          : "We could not get your location. Please try again.";
+        setNotice("reportNotice", msg, "error");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 30000
+      }
+    );
+  }
+
+  function approximateCoordinate(value) {
+    return Math.round(value * 1000) / 1000;
+  }
+
+  function extForFile(file) {
+    const nameExt = file.name?.split(".").pop()?.toLowerCase();
+    if (nameExt && /^[a-z0-9]{2,5}$/.test(nameExt)) return nameExt;
+
+    const typeMap = {
+      "image/jpeg":"jpg",
+      "image/png":"png",
+      "image/webp":"webp",
+      "image/heic":"heic",
+      "image/heif":"heif"
+    };
+
+    return typeMap[file.type] || "jpg";
+  }
+
+  async function submitReport(e) {
+    e.preventDefault();
+    const btn = $("submitReportBtn");
+    setNotice("reportNotice");
+
+    const categoryId = $("selectedCategory").value;
+    const title = $("reportTitle").value.trim();
+    const description = $("reportDescription").value.trim();
+    const locationLabel = $("reportLocationLabel").value.trim() || "Mbombela";
+
+    if (!categoryId || !state.location || !title) {
+      setNotice("reportNotice", "Some required report information is missing. Please review the previous steps.", "error");
+      return;
+    }
+    if (!$("reportDeclaration").checked) {
+      setNotice("reportNotice", "Please confirm the declaration before submitting.", "error");
+      return;
+    }
+
+    setButtonLoading(btn, true, "Submitting securely...");
+
+    try {
+      const { data: report, error: reportError } = await sb
+        .from("reports")
+        .insert({
+          reporter_id: state.user.id,
+          municipality_id: state.municipality?.id || null,
+          category_id: categoryId,
+          title,
+          description: description || null,
+          public_location_label: locationLabel,
+          public_latitude: approximateCoordinate(state.location.lat),
+          public_longitude: approximateCoordinate(state.location.lng)
+        })
+        .select("id, reference_number")
+        .single();
+
+      if (reportError) throw reportError;
+
+      const { error: locationError } = await sb.from("report_locations").insert({
+        report_id: report.id,
+        latitude: state.location.lat,
+        longitude: state.location.lng,
+        accuracy_meters: state.location.accuracy || null,
+        location_source: "gps"
+      });
+      if (locationError) console.warn("Private location insert:", locationError);
+
+      let photoWarning = false;
+      for (let i = 0; i < state.selectedPhotos.length; i++) {
+        const file = state.selectedPhotos[i];
+        const ext = extForFile(file);
+        const path = `${state.user.id}/${report.id}/${crypto.randomUUID()}.${ext}`;
+
+        const { error: uploadError } = await sb.storage.from("report-images").upload(path, file, {
+          cacheControl: "3600", upsert: false, contentType: file.type || undefined
+        });
+        if (uploadError) { console.error(uploadError); photoWarning = true; continue; }
+
+        const { error: imageRowError } = await sb.from("report_images").insert({
+          report_id: report.id,
+          uploaded_by: state.user.id,
+          object_path: path,
+          image_type: i === 0 ? "report" : "additional"
+        });
+        if (imageRowError) { console.error(imageRowError); photoWarning = true; }
+      }
+
+      state.submittedReportId = report.id;
+      $("successReference").textContent = report.reference_number || report.id.slice(0,8).toUpperCase();
+      $("reportForm").classList.add("hidden");
+      document.querySelector(".wizard-progress")?.classList.add("hidden");
+      $("reportSuccess").classList.remove("hidden");
+      setButtonLoading(btn, false);
+      toast(photoWarning ? "Report saved. One or more photos could not be attached." : "Report submitted successfully.");
+      await loadAll();
+
+    } catch (err) {
+      console.error(err);
+      setButtonLoading(btn, false);
+      setNotice("reportNotice", err.message || "The report could not be submitted.", "error");
+    }
+  }
+
+  function resetReportForm() {
+    $("reportForm").reset();
+    $("selectedCategory").value = "";
+    state.selectedPhotos = [];
+    state.location = null;
+    state.reportStep = 1;
+    renderPhotoPreviews();
+    updateReportCounters();
+    $("locationResult").classList.add("hidden");
+    $("reportLocationMap").classList.add("hidden");
+    $("duplicateCheck").classList.add("hidden");
+    $("duplicateCheck").innerHTML = "";
+    $("categoryGrid").querySelectorAll(".category-option").forEach(b => b.classList.remove("selected"));
+    setNotice("reportNotice");
+    goToReportStep(1);
+  }
+
+  async function openReportDetails(reportId) {
+    let report =
+      state.myReports.find(r => r.id === reportId) ||
+      state.publicReports.find(r => r.id === reportId);
+
+    if (!report) return;
+
+    const { data: fullReport, error } = await sb
+      .from("reports")
+      .select(`
+        *,
+        issue_categories(name, slug)
+      `)
+      .eq("id", reportId)
+      .single();
+
+    if (!error && fullReport) report = fullReport;
+
+    state.detailReport = report;
+
+    $("detailStatus").className = `status s-${report.status}`;
+    $("detailStatus").textContent = niceStatus(report.status);
+    $("detailTitle").textContent = report.title;
+    $("detailRef").textContent = `${report.reference_number} • ${report.public_location_label || "Mbombela"} • ${formatDate(report.created_at)}`;
+    $("detailDescription").textContent = report.description || "No additional description was provided.";
+
+    const { data: history } = await sb
+      .from("report_status_history")
+      .select("*")
+      .eq("report_id", reportId)
+      .order("created_at", { ascending: false });
+
+    const timeline = $("detailTimeline");
+
+    timeline.innerHTML = (history || []).length
+      ? history.map(item => `
+          <div class="timeline-item">
+            <strong>${escapeHtml(niceStatus(item.new_status))}</strong>
+            <span>${escapeHtml(item.note || "Report status updated")} • ${formatDate(item.created_at)}</span>
+          </div>
+        `).join("")
+      : `<div class="empty"><strong>No timeline yet</strong>Status history will appear here.</div>`;
+
+    const supportBtn = $("supportReportBtn");
+    const isOwn = report.reporter_id === state.user.id;
+    const isPubliclySupportable = !["submitted","under_review","invalid"].includes(report.status);
+
+    supportBtn.classList.toggle("hidden", isOwn || !isPubliclySupportable);
+
+    if (!isOwn && isPubliclySupportable) {
+      const { data: supported } = await sb
+        .from("report_supporters")
+        .select("report_id")
+        .eq("report_id", reportId)
+        .eq("user_id", state.user.id)
+        .maybeSingle();
+
+      supportBtn.textContent = supported ? "Remove my support" : "I'm also affected";
+      supportBtn.dataset.supported = supported ? "1" : "0";
+    }
+
+    $("detailModal").classList.remove("hidden");
+  }
+
+  async function supportCurrentReport() {
+    const report = state.detailReport;
+    if (!report) return;
+
+    const btn = $("supportReportBtn");
+    const supported = btn.dataset.supported === "1";
+    setButtonLoading(btn, true, supported ? "Removing..." : "Adding...");
+
+    let error;
+
+    if (supported) {
+      ({ error } = await sb
+        .from("report_supporters")
+        .delete()
+        .eq("report_id", report.id)
+        .eq("user_id", state.user.id));
+    } else {
+      ({ error } = await sb
+        .from("report_supporters")
+        .insert({
+          report_id: report.id,
+          user_id: state.user.id
+        }));
+    }
+
+    setButtonLoading(btn, false);
+
+    if (error) {
+      toast(error.message);
+      return;
+    }
+
+    btn.dataset.supported = supported ? "0" : "1";
+    btn.textContent = supported ? "I'm also affected" : "Remove my support";
+    toast(supported ? "Support removed." : "Added — you are also affected.");
+
+    await loadPublicReports();
+    renderRecentReports();
+    renderStats();
+  }
+
+  function renderCommunityMap() {
+    const el = $("communityMap");
+    if (!el || typeof L === "undefined") return;
+
+    if (!state.communityMap) {
+      state.communityMap = L.map("communityMap").setView([-25.4753, 30.9694], 12);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(state.communityMap);
+    }
+
+    state.communityMarkers.forEach(m => m.remove());
+    state.communityMarkers = [];
+
+    state.publicReports
+      .filter(r => Number.isFinite(r.public_latitude) && Number.isFinite(r.public_longitude))
+      .forEach(report => {
+        const marker = L.circleMarker(
+          [report.public_latitude, report.public_longitude],
+          {
+            radius: 9,
+            weight: 2,
+            fillOpacity: .75
+          }
+        ).addTo(state.communityMap);
+
+        marker.bindPopup(`
+          <div style="font-family:Manrope,sans-serif;min-width:190px">
+            <strong>${escapeHtml(report.title)}</strong>
+            <div style="font-size:11px;margin-top:5px;color:#6d7972">
+              ${escapeHtml(report.issue_categories?.name || "Issue")} • ${escapeHtml(report.public_location_label || "Mbombela")}
+            </div>
+            <div style="font-size:11px;margin-top:7px;font-weight:800">
+              ${escapeHtml(niceStatus(report.status))}
+            </div>
+          </div>
+        `);
+
+        marker.on("click", () => {
+          marker.openPopup();
+        });
+
+        state.communityMarkers.push(marker);
+      });
+
+    setTimeout(() => state.communityMap.invalidateSize(), 100);
+  }
+
+  function setupRealtime() {
+    leaveRealtime();
+
+    state.realtimeChannel = sb
+      .channel(`cm-civic-${state.user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "reports" },
+        async payload => {
+          await Promise.all([loadMyReports(), loadPublicReports(), loadProfile()]);
+          renderMyReports();
+          renderRecentReports();
+          renderProfile();
+          renderStats();
+
+          if (!$("mapScreen").classList.contains("hidden")) renderCommunityMap();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${state.user.id}`
+        },
+        async () => {
+          await loadNotifications();
+          renderNotifications();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "report_status_history" },
+        async payload => {
+          if (
+            state.detailReport &&
+            payload.new?.report_id === state.detailReport.id
+          ) {
+            await openReportDetails(state.detailReport.id);
+          }
+        }
+      )
+      .subscribe();
+  }
+
+  function leaveRealtime() {
+    if (state.realtimeChannel) {
+      sb.removeChannel(state.realtimeChannel);
+      state.realtimeChannel = null;
+    }
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
