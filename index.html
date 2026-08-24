@@ -590,6 +590,39 @@
     #reportAnotherBtn{margin-top:8px}
     @media(min-width:900px){.report-wizard-sheet{width:min(760px,calc(100% - 40px))}.sheet-inner{padding:28px 32px}.wizard-actions{bottom:-28px}}
 
+  
+    /* CM CIVIC — RESIDENT WARD HUB */
+    .ward-home-card{border:1px solid #cfe3d7;background:#f7fbf8;border-radius:20px;padding:17px;margin-bottom:14px}
+    .ward-home-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .ward-home-head h3{font-size:16px;margin:5px 0 4px;letter-spacing:-.35px}
+    .ward-home-head p{font-size:10px;color:var(--muted);line-height:1.5;margin:0}
+    .ward-badge{display:inline-flex;align-items:center;padding:6px 9px;border-radius:999px;background:var(--brand);color:#fff;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.45px}
+    .ward-update-preview{margin-top:13px;padding:13px;background:#fff;border:1px solid var(--line);border-radius:15px}
+    .ward-update-preview strong{display:block;font-size:11px;margin-bottom:4px}
+    .ward-update-preview p{font-size:9px;color:var(--muted);line-height:1.55;margin:0}
+    .ward-update-preview .meta{font-size:8px;color:#8b9690;margin-top:7px}
+    .ward-page-hero{background:var(--brand);color:#fff;border-radius:22px;padding:21px;margin-bottom:14px}
+    .ward-page-hero .eyebrow{color:#cfe8da}
+    .ward-page-hero h2{font-size:28px;letter-spacing:-1px;margin:8px 0 5px}
+    .ward-page-hero p{font-size:10px;line-height:1.55;color:#dbece3;margin:0}
+    .ward-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:15px}
+    .ward-stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);border-radius:13px;padding:11px}
+    .ward-stat strong{display:block;font-size:19px;margin-bottom:2px}
+    .ward-stat span{font-size:8px;color:#dbece3}
+    .announcement-list{display:grid;gap:10px}
+    .announcement-card{border:1px solid var(--line);background:#fff;border-radius:17px;padding:15px;text-align:left}
+    .announcement-card.warning{border-left:4px solid #b7791f}
+    .announcement-card.critical{border-left:4px solid var(--danger)}
+    .announcement-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}
+    .announcement-card h3{font-size:13px;margin:0 0 5px}
+    .announcement-card p{font-size:10px;line-height:1.6;color:var(--muted);margin:0}
+    .announcement-card time{font-size:8px;color:#8b9690}
+    .ward-setup{border:1px dashed #b9cbc0;background:#fbfdfb;border-radius:18px;padding:18px;text-align:center}
+    .ward-setup h3{font-size:14px;margin:0 0 5px}
+    .ward-setup p{font-size:10px;color:var(--muted);line-height:1.55;margin:0 0 13px}
+    .ward-selector{display:grid;grid-template-columns:1fr auto;gap:8px}
+    @media(max-width:520px){.ward-stats{grid-template-columns:1fr 1fr 1fr}.ward-selector{grid-template-columns:1fr}}
+
   </style>
 </head>
 <body>
@@ -743,14 +776,23 @@
             <small>See verified reports around Mbombela.</small>
           </button>
 
-          <button class="quick-card" data-screen="notificationsScreen">
+          <button class="quick-card" data-screen="wardScreen">
             <div class="qi">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg>
             </div>
-            <strong>Updates</strong>
-            <small>Check changes on your reports.</small>
+            <strong>My ward</strong>
+            <small>See councillor updates and ward issues.</small>
           </button>
         </div>
+      </section>
+
+
+      <section class="section" style="padding-top:0">
+        <div class="section-title">
+          <h2>My ward</h2>
+          <button data-screen="wardScreen">Open ward</button>
+        </div>
+        <div id="homeWardCard"></div>
       </section>
 
       <section class="section" style="padding-top:0">
@@ -813,6 +855,29 @@
     <div class="content">
       <section class="section">
         <div id="notificationsList" class="issue-list"></div>
+      </section>
+    </div>
+  </main>
+
+
+  <main id="wardScreen" class="screen hidden">
+    <section class="page-head">
+      <div class="content">
+        <h1>My ward</h1>
+        <p>Local service reports and updates published for your ward.</p>
+      </div>
+    </section>
+    <div class="content">
+      <section class="section">
+        <div id="wardHero"></div>
+      </section>
+      <section class="section" style="padding-top:0">
+        <div class="section-title"><h2>Ward announcements</h2></div>
+        <div id="wardAnnouncements" class="announcement-list"></div>
+      </section>
+      <section class="section" style="padding-top:0">
+        <div class="section-title"><h2>Ward issues</h2></div>
+        <div id="wardReportsList" class="issue-list"></div>
       </section>
     </div>
   </main>
@@ -1088,7 +1153,12 @@
     detailReport: null,
     realtimeChannel: null,
     reportStep: 1,
-    submittedReportId: null
+    submittedReportId: null,
+    wards: [],
+    residentWardId: null,
+    residentWard: null,
+    wardAnnouncements: [],
+    wardReports: []
   };
 
   const $ = (id) => document.getElementById(id);
@@ -1315,7 +1385,14 @@
       loadMunicipality(),
       loadMyReports(),
       loadPublicReports(),
-      loadNotifications()
+      loadNotifications(),
+      loadWards(),
+      loadResidentWard()
+    ]);
+
+    await Promise.all([
+      loadWardAnnouncements(),
+      loadWardReports()
     ]);
 
     renderEverything();
@@ -1408,6 +1485,167 @@
     if (!error) state.notifications = data || [];
   }
 
+
+  async function loadWards() {
+    if (!state.municipality) return;
+    const { data, error } = await sb
+      .from("wards")
+      .select("id,ward_number,name,active")
+      .eq("municipality_id", state.municipality.id)
+      .eq("active", true)
+      .order("ward_number");
+    if (!error) state.wards = data || [];
+  }
+
+  async function loadResidentWard() {
+    const { data, error } = await sb
+      .from("resident_ward_preferences")
+      .select("ward_id,wards(id,ward_number,name)")
+      .eq("user_id", state.user.id)
+      .maybeSingle();
+
+    if (!error && data?.ward_id) {
+      state.residentWardId = data.ward_id;
+      state.residentWard = data.wards || state.wards.find(w => w.id === data.ward_id) || null;
+    } else {
+      state.residentWardId = null;
+      state.residentWard = null;
+    }
+  }
+
+  async function loadWardAnnouncements() {
+    if (!state.residentWardId) {
+      state.wardAnnouncements = [];
+      return;
+    }
+    const { data, error } = await sb
+      .from("ward_announcements")
+      .select("id,ward_id,title,message,severity,active,starts_at,ends_at,created_at")
+      .eq("ward_id", state.residentWardId)
+      .eq("active", true)
+      .lte("starts_at", new Date().toISOString())
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (!error) state.wardAnnouncements = (data || []).filter(a => !a.ends_at || new Date(a.ends_at) >= new Date());
+  }
+
+  async function loadWardReports() {
+    if (!state.residentWardId) {
+      state.wardReports = [];
+      return;
+    }
+    const { data, error } = await sb
+      .from("reports")
+      .select(`
+        id,reference_number,title,description,status,priority,public_location_label,
+        public_latitude,public_longitude,support_count,reporter_id,created_at,
+        issue_categories(name,slug)
+      `)
+      .eq("ward_id", state.residentWardId)
+      .eq("is_public", true)
+      .eq("is_hidden", false)
+      .not("status", "in", '("invalid")')
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (!error) state.wardReports = data || [];
+  }
+
+  async function saveResidentWard(wardId) {
+    const { error } = await sb.from("resident_ward_preferences").upsert({
+      user_id: state.user.id,
+      ward_id: wardId,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "user_id" });
+
+    if (error) return toast(error.message);
+    await loadResidentWard();
+    await Promise.all([loadWardAnnouncements(), loadWardReports()]);
+    renderWard();
+    toast(`Ward ${state.residentWard?.ward_number || ""} saved.`);
+  }
+
+  function wardSetupHtml() {
+    const options = state.wards.map(w => `<option value="${w.id}">Ward ${w.ward_number}${w.name && w.name !== `Ward ${w.ward_number}` ? ` — ${escapeHtml(w.name)}` : ""}</option>`).join("");
+    return `<div class="ward-setup">
+      <h3>Select your ward</h3>
+      <p>This controls which councillor announcements you receive. You can change it later.</p>
+      <div class="ward-selector">
+        <select id="residentWardSelect"><option value="">Choose a ward</option>${options}</select>
+        <button id="saveResidentWardBtn" class="primary-btn" type="button">Save ward</button>
+      </div>
+    </div>`;
+  }
+
+  function renderWard() {
+    const home = $("homeWardCard");
+    const hero = $("wardHero");
+    const list = $("wardAnnouncements");
+    const reportsEl = $("wardReportsList");
+
+    if (!state.residentWardId || !state.residentWard) {
+      home.innerHTML = wardSetupHtml();
+      hero.innerHTML = wardSetupHtml();
+      list.innerHTML = `<div class="empty"><strong>Select your ward first</strong>Ward announcements will appear here after you choose your ward.</div>`;
+      reportsEl.innerHTML = `<div class="empty"><strong>No ward selected</strong></div>`;
+      wireWardSelectors();
+      return;
+    }
+
+    const wardNo = state.residentWard.ward_number;
+    const latest = state.wardAnnouncements[0];
+    home.innerHTML = `<div class="ward-home-card">
+      <div class="ward-home-head">
+        <div><span class="ward-badge">Ward ${wardNo}</span><h3>${latest ? "Latest ward update" : "Your ward is connected"}</h3>
+        <p>${latest ? escapeHtml(latest.title) : "Councillor announcements for this ward will appear here automatically."}</p></div>
+        <button class="secondary-btn" data-screen="wardScreen">View</button>
+      </div>
+      ${latest ? `<div class="ward-update-preview"><strong>${escapeHtml(latest.title)}</strong><p>${escapeHtml(latest.message)}</p><div class="meta">Ward ${wardNo} • ${formatDate(latest.created_at)}</div></div>` : ""}
+    </div>`;
+
+    const open = state.wardReports.filter(r => !["resolved","community_confirmed","invalid","duplicate"].includes(r.status)).length;
+    const resolved = state.wardReports.filter(r => ["resolved","community_confirmed"].includes(r.status)).length;
+    hero.innerHTML = `<div class="ward-page-hero">
+      <span class="eyebrow">City of Mbombela</span>
+      <h2>Ward ${wardNo}</h2>
+      <p>Your local CM Civic hub. Announcements below are published for this ward and update in realtime.</p>
+      <div class="ward-stats">
+        <div class="ward-stat"><strong>${state.wardReports.length}</strong><span>Ward reports</span></div>
+        <div class="ward-stat"><strong>${open}</strong><span>Open</span></div>
+        <div class="ward-stat"><strong>${resolved}</strong><span>Resolved</span></div>
+      </div>
+    </div>
+    <div class="ward-setup">
+      <p style="margin-bottom:10px">Wrong ward? Change your resident ward below.</p>
+      <div class="ward-selector"><select id="residentWardSelect"><option value="">Choose another ward</option>${state.wards.map(w=>`<option value="${w.id}" ${w.id===state.residentWardId?"selected":""}>Ward ${w.ward_number}</option>`).join("")}</select><button id="saveResidentWardBtn" class="primary-btn" type="button">Update</button></div>
+    </div>`;
+
+    list.innerHTML = state.wardAnnouncements.length ? state.wardAnnouncements.map(a => `
+      <article class="announcement-card ${escapeHtml(a.severity || "info")}">
+        <div class="announcement-top"><span class="ward-badge">Ward ${wardNo} • ${escapeHtml(niceStatus(a.severity || "info"))}</span><time>${formatDate(a.created_at)}</time></div>
+        <h3>${escapeHtml(a.title)}</h3>
+        <p>${escapeHtml(a.message)}</p>
+      </article>`).join("") :
+      `<div class="empty"><strong>No active ward announcements</strong>When your ward councillor publishes an update, it will appear here automatically.</div>`;
+
+    reportsEl.innerHTML = state.wardReports.length ? state.wardReports.slice(0,20).map(r => reportCard(r)).join("") :
+      `<div class="empty"><strong>No public ward reports yet</strong>Reports assigned to Ward ${wardNo} will appear here.</div>`;
+
+    wireWardSelectors();
+    wireReportCards(reportsEl);
+    $$('[data-screen="wardScreen"]').forEach(btn => btn.onclick = () => showScreen("wardScreen"));
+  }
+
+  function wireWardSelectors() {
+    $$("[id=saveResidentWardBtn]").forEach(btn => {
+      btn.onclick = () => {
+        const wrap = btn.closest(".ward-setup");
+        const select = wrap?.querySelector("[id=residentWardSelect]");
+        if (!select?.value) return toast("Choose your ward first.");
+        saveResidentWard(select.value);
+      };
+    });
+  }
+
   function renderEverything() {
     renderProfile();
     renderCategories();
@@ -1415,6 +1653,7 @@
     renderRecentReports();
     renderNotifications();
     renderStats();
+    renderWard();
 
     if (!$("mapScreen").classList.contains("hidden")) renderCommunityMap();
   }
@@ -1552,7 +1791,7 @@
   }
 
   function showScreen(id) {
-    ["homeScreen","myReportsScreen","mapScreen","notificationsScreen","profileScreen"].forEach(screenId => {
+    ["homeScreen","myReportsScreen","mapScreen","notificationsScreen","wardScreen","profileScreen"].forEach(screenId => {
       $(screenId).classList.toggle("hidden", screenId !== id);
     });
 
@@ -2111,6 +2350,16 @@
         async () => {
           await loadNotifications();
           renderNotifications();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ward_announcements" },
+        async payload => {
+          if (!state.residentWardId || (payload.new?.ward_id && payload.new.ward_id !== state.residentWardId) || (payload.old?.ward_id && !payload.new && payload.old.ward_id !== state.residentWardId)) return;
+          await loadWardAnnouncements();
+          renderWard();
+          if (payload.eventType === "INSERT") toast("New announcement from your ward.");
         }
       )
       .on(
