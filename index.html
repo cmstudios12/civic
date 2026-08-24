@@ -3138,14 +3138,34 @@
 
 
       async function loadWards() {
-        if (!state.municipality) return;
-        const { data, error } = await sb
-          .from("wards")
-          .select("id,ward_number,name,active")
-          .eq("municipality_id", state.municipality.id)
-          .eq("active", true)
-          .order("ward_number");
-        if (!error) state.wards = data || [];
+        state.wards = [];
+
+        try {
+          // Do not make the ward selector depend on a frontend municipality UUID.
+          // RLS decides which active wards this resident is allowed to read.
+          const { data, error } = await sb
+            .from("wards")
+            .select("id,municipality_id,ward_number,name,active")
+            .eq("active", true)
+            .order("ward_number", { ascending: true });
+
+          if (error) {
+            console.error("CM Civic: Failed to load wards:", error);
+            toast("We couldn't load the ward list. Please refresh or contact support.");
+            return;
+          }
+
+          state.wards = (data || []).sort((a, b) => Number(a.ward_number) - Number(b.ward_number));
+          console.log(`CM Civic: ${state.wards.length} active wards loaded.`, state.wards);
+
+          if (!state.wards.length) {
+            toast("No active wards are available yet.");
+          }
+        } catch (err) {
+          console.error("CM Civic: Ward loading error:", err);
+          state.wards = [];
+          toast("We couldn't load the ward list.");
+        }
       }
 
       async function loadResidentWard() {
@@ -3216,14 +3236,22 @@
       }
 
       function wardSetupHtml() {
-        const options = state.wards.map(w => `<option value="${w.id}">Ward ${w.ward_number}${w.name && w.name !== `Ward ${w.ward_number}` ? ` — ${escapeHtml(w.name)}` : ""}</option>`).join("");
+        const hasWards = state.wards.length > 0;
+        const options = state.wards.map(w =>
+          `<option value="${w.id}">Ward ${escapeHtml(w.ward_number)}${w.name && w.name !== `Ward ${w.ward_number}` ? ` — ${escapeHtml(w.name)}` : ""}</option>`
+        ).join("");
+
         return `<div class="ward-setup">
       <h3>Select your ward</h3>
-      <p>This controls which councillor announcements you receive. You can change it later.</p>
+      <p>This controls which councillor announcements and ward reports you receive.</p>
       <div class="ward-selector">
-        <select id="residentWardSelect"><option value="">Choose a ward</option>${options}</select>
-        <button id="saveResidentWardBtn" class="primary-btn" type="button">Save ward</button>
+        <select id="residentWardSelect" ${hasWards ? "" : "disabled"}>
+          <option value="">${hasWards ? "Choose a ward" : "No wards available"}</option>
+          ${options}
+        </select>
+        <button id="saveResidentWardBtn" class="primary-btn" type="button" ${hasWards ? "" : "disabled"}>Save ward</button>
       </div>
+      ${hasWards ? "" : `<div class="notice" style="margin-top:10px">The ward list could not be loaded from CM Civic. Make sure the wards table contains active wards and its SELECT RLS policy allows authenticated residents.</div>`}
     </div>`;
       }
 
@@ -3267,7 +3295,7 @@
     </div>
     <div class="ward-setup">
       <p style="margin-bottom:10px">Wrong ward? Change your resident ward below.</p>
-      <div class="ward-selector"><select id="residentWardSelect"><option value="">Choose another ward</option>${state.wards.map(w => `<option value="${w.id}" ${w.id === state.residentWardId ? "selected" : ""}>Ward ${w.ward_number}</option>`).join("")}</select><button id="saveResidentWardBtn" class="primary-btn" type="button">Update</button></div>
+      <div class="ward-selector"><select id="residentWardSelect"><option value="">Choose another ward</option>${state.wards.map(w => `<option value="${w.id}" ${w.id === state.residentWardId ? "selected" : ""}>Ward ${escapeHtml(w.ward_number)}${w.name && w.name !== `Ward ${w.ward_number}` ? ` — ${escapeHtml(w.name)}` : ""}</option>`).join("")}</select><button id="saveResidentWardBtn" class="primary-btn" type="button">Update</button></div>
     </div>`;
 
         list.innerHTML = state.wardAnnouncements.length ? state.wardAnnouncements.map(a => `
