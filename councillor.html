@@ -256,7 +256,223 @@
       .stats{grid-template-columns:1fr 1fr}
       .section-head{flex-direction:column}
     }
-  </style>
+  
+/* =========================================================
+   CM CIVIC — PROFESSIONAL COUNCILLOR PORTAL UI UPGRADE
+   Clean civic/government dashboard. No glassmorphism.
+   ========================================================= */
+:root{
+  --bg:#f5f7f6;
+  --surface:#ffffff;
+  --surface-2:#f0f4f2;
+  --ink:#122019;
+  --muted:#66736c;
+  --line:#dfe6e2;
+  --brand:#096b42;
+  --brand-dark:#075334;
+  --brand-soft:#e7f4ed;
+  --danger:#b42318;
+  --danger-soft:#fff0ee;
+  --warning:#8a5b00;
+  --warning-soft:#fff5dc;
+  --info:#175cd3;
+  --info-soft:#edf4ff;
+  --shadow:0 12px 34px rgba(20,38,29,.07);
+  --shadow-sm:0 4px 14px rgba(20,38,29,.045);
+  --radius:18px;
+  --sidebar:282px;
+  --topbar:74px;
+}
+body{background:var(--bg)}
+button{touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid rgba(9,107,66,.18);outline-offset:2px
+}
+.brand{gap:12px}
+.brand-mark{
+  width:42px;height:42px;border-radius:12px;
+  background:var(--brand);box-shadow:0 7px 16px rgba(9,107,66,.18)
+}
+.sidebar{
+  width:var(--sidebar);border-right:1px solid #e4e9e6;
+  box-shadow:none
+}
+.sidebar-head{height:var(--topbar);padding:0 20px}
+.sidebar-body{padding:19px 14px}
+.nav-label{
+  padding:0 11px 8px;margin-top:16px;color:#8a948f;
+  font-size:9px;letter-spacing:1.1px
+}
+.nav-btn{
+  min-height:46px;border-radius:11px;padding:11px 12px;
+  font-size:12px;font-weight:700;position:relative
+}
+.nav-btn.active{
+  background:var(--brand-soft);color:var(--brand-dark);
+  box-shadow:inset 3px 0 0 var(--brand)
+}
+.nav-btn.active .nav-count{background:#fff;color:var(--brand-dark)}
+.nav-count{height:22px;min-width:22px;padding:0 6px}
+.sidebar-foot{padding:14px}
+.user-mini{background:#f4f7f5;border:1px solid var(--line);padding:10px;border-radius:13px}
+.avatar{border-radius:10px}
+.topbar{
+  left:var(--sidebar);height:var(--topbar);padding:0 26px;
+  background:#fff;backdrop-filter:none;border-bottom:1px solid #e4e9e6
+}
+.top-title{font-size:16px}
+.icon-btn{
+  width:40px;height:40px;border-radius:10px;transition:.16s ease;
+  color:#34443b
+}
+.icon-btn:hover{background:var(--surface-2);border-color:#cdd8d2}
+.ward-pill{border:1px solid #cfe7da;padding:7px 11px}
+.main{margin-left:var(--sidebar);padding-top:var(--topbar)}
+.main-inner{width:min(1480px,100%);padding:28px 30px 42px}
+.section-head{margin-bottom:22px;align-items:center}
+.section-head h1{font-size:30px;line-height:1.15;letter-spacing:-1.1px;margin-bottom:6px}
+.section-head p{font-size:12px;max-width:680px}
+.btn{
+  border-radius:10px;min-height:42px;padding:10px 14px;
+  box-shadow:none;font-size:11px;letter-spacing:.01em
+}
+.btn:hover{transform:none}
+.btn-primary{box-shadow:0 6px 14px rgba(9,107,66,.14)}
+.btn-primary:hover{box-shadow:0 8px 18px rgba(9,107,66,.18)}
+input,select,textarea{
+  border-radius:10px;border-color:#d5ded9;background:#fff;
+  min-height:44px
+}
+textarea{min-height:120px}
+.stats{gap:14px;margin-bottom:18px}
+.stat{
+  border-radius:16px;padding:17px 18px;box-shadow:var(--shadow-sm);
+  position:relative;overflow:hidden;min-height:112px
+}
+.stat:before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#d9e3de
+}
+.stat:nth-child(2):before{background:#d79b24}
+.stat:nth-child(3):before{background:#c94a3e}
+.stat:nth-child(4):before{background:var(--brand)}
+.stat:nth-child(5):before{background:#3974c6}
+.stat span{text-transform:uppercase;letter-spacing:.55px;font-size:9px}
+.stat strong{font-size:30px;margin-top:17px}
+.grid-2{gap:17px}
+.panel{
+  border-radius:16px;border-color:#e0e7e3;box-shadow:var(--shadow-sm)
+}
+.panel-head{padding:16px 18px;min-height:58px;background:#fff}
+.panel-head h2{font-size:13px}
+.panel-body{padding:17px 18px}
+.table-wrap{border-radius:14px;border-color:#e0e7e3}
+table{min-width:850px}
+th{background:#f8faf9;padding-top:11px;padding-bottom:11px}
+td{padding-top:13px;padding-bottom:13px}
+tbody tr{transition:.12s ease}
+tbody tr:hover{background:#fbfcfb}
+.cell-title{font-size:11px}
+.status,.priority{padding:6px 9px;font-size:8px}
+.cards{gap:14px}
+.card{
+  border-radius:15px;padding:17px;box-shadow:var(--shadow-sm);
+  transition:.16s ease
+}
+.card:hover{border-color:#cbd8d1;box-shadow:0 10px 26px rgba(20,38,29,.07)}
+.card h3{font-size:14px}
+.card p{font-size:10px;line-height:1.65}
+.activity-item{padding:13px 0}
+.act-icon{border-radius:9px}
+.map-panel{border-radius:16px}
+#wardMap{height:640px}
+.modal{background:rgba(8,18,13,.62);padding:24px}
+.modal-card{border-radius:18px;box-shadow:0 28px 80px rgba(0,0,0,.20)}
+.modal-head{padding:18px 20px}
+.modal-body{padding:20px}
+.detail-card{border-radius:14px;padding:17px}
+.photo-grid img{border-radius:10px}
+.toast{font-size:11px;border-radius:11px;box-shadow:0 12px 35px rgba(0,0,0,.18)}
+.auth{grid-template-columns:minmax(0,1.15fr) minmax(390px,.85fr)}
+.auth-side{
+  padding:48px 54px;border-right:1px solid #dfe8e3;
+  background:#f1f7f3;position:relative;overflow:hidden
+}
+.auth-side:after{
+  content:"";position:absolute;width:520px;height:520px;border-radius:50%;
+  right:-260px;bottom:-260px;border:80px solid rgba(9,107,66,.045);
+  pointer-events:none
+}
+.auth-side h1{
+  font-size:clamp(45px,5vw,70px);line-height:1;letter-spacing:-3px;
+  max-width:720px
+}
+.auth-side p{font-size:14px}
+.auth-points{gap:14px}
+.auth-point{
+  border-radius:14px;padding:17px;box-shadow:var(--shadow-sm);
+  position:relative;z-index:1
+}
+.auth-panel{padding:42px;background:#fff}
+.auth-card{width:min(420px,100%)}
+.auth-card h2{font-size:31px;margin-top:28px}
+.auth-card p{font-size:12px}
+.toolbar{gap:10px}
+.empty{padding:44px 18px}
+#profileSection .panel{min-height:210px}
+
+/* polished mobile portal */
+@media(max-width:1100px){
+  :root{--sidebar:246px}
+}
+@media(max-width:850px){
+  :root{--sidebar:0px;--topbar:66px}
+  .sidebar{
+    width:min(310px,86vw);box-shadow:18px 0 50px rgba(15,30,22,.16);
+    z-index:200
+  }
+  .topbar{left:0;padding:0 14px}
+  .top-actions{gap:6px}
+  .ward-pill{font-size:9px;padding:6px 9px}
+  .main{margin-left:0}
+  .main-inner{padding:18px 14px 34px}
+  .section-head{align-items:flex-start}
+  .section-head h1{font-size:26px}
+  .auth-panel{padding:24px 18px}
+  .auth-card h2{font-size:29px}
+  #wardMap{height:calc(100dvh - 190px);min-height:470px}
+  .modal{padding:12px;align-items:end}
+  .modal-card{max-height:92dvh;border-radius:18px 18px 0 0}
+  .detail-grid{gap:10px}
+}
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat{min-height:100px;padding:14px}
+  .stat strong{font-size:27px;margin-top:14px}
+  .grid-2{gap:12px}
+  .panel-head{padding:14px}
+  .panel-body{padding:14px}
+  .cards{gap:10px}
+  .toolbar{gap:8px}
+  .section-head .btn{width:100%}
+  .top-title{max-width:145px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media(max-width:380px){
+  .stats{grid-template-columns:1fr}
+  .topWardPill{display:none}
+}
+
+
+/* CM Civic Councillor Portal — operational detail upgrade */
+.ward-command-strip{display:grid;grid-template-columns:minmax(180px,1fr) 1px minmax(220px,1.3fr) auto;align-items:center;gap:20px;background:#0a5f3c;color:#fff;border-radius:17px;padding:18px 20px;margin-bottom:16px;box-shadow:0 12px 28px rgba(9,90,57,.14)}
+.ward-command-strip>div{min-width:0}.command-label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.8px;color:#b9dcc9;font-weight:800;margin-bottom:5px}.ward-command-strip strong{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ward-command-strip small{display:block;font-size:9px;color:#d7e9df;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.command-divider{height:38px;background:rgba(255,255,255,.18)}.ward-command-strip .btn{background:#fff;border:0;color:#075334}
+.councillor-hero{display:grid;grid-template-columns:76px minmax(0,1fr) auto;align-items:center;gap:18px;background:#075b39;color:#fff;border-radius:18px;padding:22px;margin-bottom:16px;box-shadow:0 14px 32px rgba(9,90,57,.14)}.councillor-avatar{width:76px;height:76px;border-radius:20px;background:#fff;color:#075b39;display:grid;place-items:center;font-size:21px;font-weight:900}.councillor-role{font-size:8px;text-transform:uppercase;letter-spacing:.8px;color:#b9dcc9;font-weight:900}.councillor-identity h2{font-size:23px;letter-spacing:-.7px;margin:4px 0}.councillor-identity p{font-size:10px;color:#d7e9df;margin:0}.account-active{font-size:8px;font-weight:900;text-transform:uppercase;background:#fff;color:#075b39;border-radius:999px;padding:8px 10px}.profile-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.profile-facts{display:grid;grid-template-columns:1fr 1fr;gap:0}.profile-facts>div{padding:14px 0;border-bottom:1px solid var(--line)}.profile-facts>div:nth-child(odd){padding-right:18px}.profile-facts>div:nth-child(even){padding-left:18px;border-left:1px solid var(--line)}.profile-facts span{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.55px;color:var(--muted);font-weight:800;margin-bottom:5px}.profile-facts strong{font-size:11px;overflow-wrap:anywhere}.profile-metrics{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-bottom:14px}.profile-metrics>div{text-align:center;padding:16px 7px;border-right:1px solid var(--line)}.profile-metrics>div:last-child{border-right:0}.profile-metrics strong{display:block;font-size:23px}.profile-metrics span{display:block;font-size:8px;color:var(--muted);margin-top:3px}
+.map-toolbar-pro{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.map-filter{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;min-height:36px;padding:7px 11px;font-size:9px;font-weight:800}.map-filter span{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;background:var(--surface-2);border-radius:999px;margin-left:4px}.map-filter.active{background:var(--brand);border-color:var(--brand);color:#fff}.map-filter.active span{background:rgba(255,255,255,.16)}.map-layout-pro{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.45fr);gap:14px}.map-panel{position:relative}.map-list-panel{max-height:640px}.mapped-report-list{max-height:580px;overflow:auto}.mapped-report-item{width:100%;border:0;border-bottom:1px solid var(--line);background:#fff;text-align:left;padding:14px 16px}.mapped-report-item:hover{background:#f8faf9}.mapped-report-item:last-child{border-bottom:0}.mapped-report-item strong{display:block;font-size:10px;line-height:1.35}.mapped-report-item span{display:block;font-size:8.5px;color:var(--muted);margin-top:4px}.mapped-report-item .map-list-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.mapped-report-item .map-list-meta em{font-style:normal;font-size:7px;text-transform:uppercase;font-weight:900;padding:5px 6px;background:var(--surface-2);border-radius:999px;color:#5f6d65}.map-empty-state{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:500;width:min(360px,calc(100% - 30px));background:#fff;border:1px solid var(--line);border-radius:15px;padding:20px;text-align:center;box-shadow:0 14px 38px rgba(20,38,29,.12)}.map-empty-state strong{display:block;font-size:12px;margin-bottom:6px}.map-empty-state span{display:block;font-size:9px;line-height:1.55;color:var(--muted)}
+.cm-map-marker{background:transparent;border:0}.cm-map-pin{width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#096b42;border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.22)}.cm-map-pin.critical{background:#b42318}.cm-map-pin.resolved{background:#1d7a50}.cm-map-pin.open{background:#d28a16}
+.leaflet-popup-content-wrapper{border-radius:13px;box-shadow:0 12px 30px rgba(0,0,0,.13)}.leaflet-popup-content{font-family:Manrope,sans-serif;margin:13px 15px}
+@media(max-width:1050px){.map-layout-pro,.profile-layout{grid-template-columns:1fr}.map-list-panel{max-height:none}.mapped-report-list{max-height:360px}.ward-command-strip{grid-template-columns:1fr 1px 1fr}.ward-command-strip .btn{grid-column:1/-1}.map-panel #wardMap{height:540px}}
+@media(max-width:650px){.ward-command-strip{grid-template-columns:1fr;gap:12px}.command-divider{display:none}.councillor-hero{grid-template-columns:62px 1fr}.councillor-avatar{width:62px;height:62px;border-radius:17px}.account-active{grid-column:1/-1;width:max-content}.profile-facts{grid-template-columns:1fr}.profile-facts>div:nth-child(odd),.profile-facts>div:nth-child(even){padding:12px 0;border-left:0}.map-toolbar-pro{overflow:auto;flex-wrap:nowrap;padding-bottom:3px}.map-filter{white-space:nowrap}.map-panel #wardMap{height:500px}}
+
+</style>
 </head>
 <body>
 
@@ -266,8 +482,8 @@
   <div class="auth-side">
     <div>
       <div class="brand"><div class="brand-mark">CM</div><div>CM Civic Councillor Portal</div></div>
-      <h1>Know what is happening in your ward.</h1>
-      <p>One place for ward service reports, community pressure points, escalations, announcements and transparent progress tracking.</p>
+      <h1>Your ward. Clear priorities. Visible progress.</h1>
+      <p>A focused workspace for councillors to review service reports, identify pressure points, escalate urgent matters and keep residents informed.</p>
       <div class="auth-points">
         <div class="auth-point"><div class="brand-mark" style="width:34px;height:34px">01</div><strong>Ward-scoped access</strong><span>Councillors see only the ward assigned to their account.</span></div>
         <div class="auth-point"><div class="brand-mark" style="width:34px;height:34px">02</div><strong>Escalate issues</strong><span>Raise long-running or critical reports to the CM Civic Command Centre.</span></div>
@@ -293,6 +509,7 @@
 </section>
 
 <section id="appView" class="hidden">
+  <div id="sidebarBackdrop" class="hidden" style="position:fixed;inset:0;background:rgba(8,18,13,.38);z-index:190"></div>
   <aside id="sidebar" class="sidebar">
     <div class="sidebar-head"><div class="brand"><div class="brand-mark">CM</div><div>CM Civic</div></div></div>
     <div class="sidebar-body">
@@ -312,19 +529,25 @@
       <div class="user-mini">
         <div id="sidebarAvatar" class="avatar">WC</div>
         <div><strong id="sidebarName">Councillor</strong><span id="sidebarWard">Ward</span></div>
-        <button id="logoutBtn" class="icon-btn">→</button>
+        <button id="logoutBtn" class="icon-btn" aria-label="Sign out">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 19V5a2 2 0 0 0-2-2h-6"/></svg>
+    </button>
       </div>
     </div>
   </aside>
 
   <header class="topbar">
     <div class="topbar-left">
-      <button id="mobileMenuBtn" class="icon-btn mobile-menu">☰</button>
+      <button id="mobileMenuBtn" class="icon-btn mobile-menu" aria-label="Open navigation">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
       <div id="topTitle" class="top-title">Ward Overview</div>
     </div>
     <div class="top-actions">
       <span id="topWardPill" class="ward-pill">Ward —</span>
-      <button id="refreshBtn" class="icon-btn">↻</button>
+      <button id="refreshBtn" class="icon-btn" aria-label="Refresh ward data">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M18.5 9a7 7 0 0 0-11.8-2.5L4 9M20 15l-2.7 2.5A7 7 0 0 1 5.5 15"/></svg>
+    </button>
     </div>
   </header>
 
@@ -339,6 +562,21 @@
             <p>Current service demand, unresolved issues and community pressure points.</p>
           </div>
           <button class="btn btn-primary" data-jump="reportsSection">Open ward reports</button>
+        </div>
+
+        <div class="ward-command-strip">
+          <div>
+            <span class="command-label">Assigned ward</span>
+            <strong id="commandWardName">Ward —</strong>
+            <small id="commandMunicipality">City of Mbombela</small>
+          </div>
+          <div class="command-divider"></div>
+          <div>
+            <span class="command-label">Councillor</span>
+            <strong id="commandCouncillorName">Ward Councillor</strong>
+            <small id="commandCouncillorEmail">—</small>
+          </div>
+          <button class="btn btn-secondary" data-jump="profileSection">View ward profile</button>
         </div>
 
         <div class="stats">
@@ -397,8 +635,29 @@
       </section>
 
       <section id="mapSection" class="section">
-        <div class="section-head"><div><h1>Ward issue map</h1><p>Approximate public locations for reports in your assigned ward.</p></div><button id="fitMapBtn" class="btn btn-secondary">Fit all</button></div>
-        <div class="panel map-panel"><div id="wardMap"></div></div>
+        <div class="section-head">
+          <div><span id="mapWardBadge" class="ward-pill">Ward —</span><h1 style="margin-top:10px">Ward issue map</h1><p>Explore service reports across your assigned ward using privacy-safe public locations.</p></div>
+          <button id="fitMapBtn" class="btn btn-secondary">Fit all reports</button>
+        </div>
+        <div class="map-toolbar-pro">
+          <button class="map-filter active" data-map-filter="all">All <span id="mapAllCount">0</span></button>
+          <button class="map-filter" data-map-filter="open">Open <span id="mapOpenCount">0</span></button>
+          <button class="map-filter" data-map-filter="critical">Critical <span id="mapCriticalCount">0</span></button>
+          <button class="map-filter" data-map-filter="resolved">Resolved <span id="mapResolvedCount">0</span></button>
+        </div>
+        <div class="map-layout-pro">
+          <div class="panel map-panel">
+            <div id="wardMap"></div>
+            <div id="mapEmptyState" class="map-empty-state hidden">
+              <strong>No mapped report locations yet</strong>
+              <span>Reports are available, but none currently contain valid public latitude and longitude coordinates.</span>
+            </div>
+          </div>
+          <div class="panel map-list-panel">
+            <div class="panel-head"><h2>Mapped ward reports</h2><span id="mappedCount" class="ward-pill">0 mapped</span></div>
+            <div id="mappedReportList" class="mapped-report-list"></div>
+          </div>
+        </div>
       </section>
 
       <section id="criticalSection" class="section">
@@ -439,15 +698,50 @@
       </section>
 
       <section id="profileSection" class="section">
-        <div class="section-head"><div><h1>Profile</h1><p>Your ward councillor account and assignment.</p></div></div>
-        <div class="grid-2">
-          <div class="panel"><div class="panel-head"><h2>Account</h2></div><div class="panel-body">
-            <div class="field"><label>Name</label><input id="profileName" disabled></div>
-            <div class="field"><label>Email</label><input id="profileEmail" disabled></div>
-            <div class="field"><label>Ward</label><input id="profileWard" disabled></div>
-          </div></div>
-          <div class="panel"><div class="panel-head"><h2>Access</h2></div><div class="panel-body"><div class="notice">Ward councillor access is restricted to the ward assigned in CM Civic. Reports from other wards are blocked by Row Level Security.</div></div></div>
+        <div class="section-head">
+          <div><span class="ward-pill">Councillor account</span><h1 style="margin-top:10px">Ward councillor profile</h1><p>Your assigned ward, account details and service-reporting responsibility.</p></div>
         </div>
+
+        <div class="councillor-hero">
+          <div id="profileAvatarBig" class="councillor-avatar">WC</div>
+          <div class="councillor-identity">
+            <span class="councillor-role">Ward Councillor</span>
+            <h2 id="profileDisplayName">Ward Councillor</h2>
+            <p id="profileDisplayWard">Ward — • City of Mbombela</p>
+          </div>
+          <span class="account-active">Active assignment</span>
+        </div>
+
+        <div class="profile-layout">
+          <div class="panel">
+            <div class="panel-head"><h2>Councillor details</h2></div>
+            <div class="panel-body profile-facts">
+              <div><span>Full name</span><strong id="profileFactName">—</strong></div>
+              <div><span>Email address</span><strong id="profileFactEmail">—</strong></div>
+              <div><span>Assigned ward</span><strong id="profileFactWard">—</strong></div>
+              <div><span>Municipality</span><strong id="profileFactMunicipality">City of Mbombela</strong></div>
+              <div><span>Ward name / area</span><strong id="profileFactArea">—</strong></div>
+              <div><span>Account access</span><strong>Ward-scoped councillor</strong></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Ward responsibility</h2></div>
+            <div class="panel-body">
+              <div class="profile-metrics">
+                <div><strong id="profileMetricReports">0</strong><span>Ward reports</span></div>
+                <div><strong id="profileMetricOpen">0</strong><span>Open</span></div>
+                <div><strong id="profileMetricResolved">0</strong><span>Resolved</span></div>
+              </div>
+              <div class="notice" style="margin-bottom:0">Your portal is restricted to the ward assigned to this account. CM Civic uses the ward assignment to scope reports, escalations, announcements and map activity.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legacy fields kept for compatibility with existing identity JS -->
+        <input id="profileName" class="hidden" disabled>
+        <input id="profileEmail" class="hidden" disabled>
+        <input id="profileWard" class="hidden" disabled>
       </section>
 
     </div>
@@ -458,7 +752,9 @@
   <div class="modal-card">
     <div class="modal-head">
       <div><span id="modalStatus" class="status"></span><h2 id="modalTitle">Report</h2><div id="modalMeta" class="cell-sub"></div></div>
-      <button id="closeReportModal" class="icon-btn">✕</button>
+      <button id="closeReportModal" class="icon-btn" aria-label="Close report">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
     </div>
     <div class="modal-body">
       <div class="detail-grid">
@@ -483,7 +779,9 @@
 
 <div id="announcementModal" class="modal hidden">
   <div class="modal-card" style="width:min(560px,100%)">
-    <div class="modal-head"><div><h2 style="margin:0">New ward announcement</h2></div><button id="closeAnnouncementModal" class="icon-btn">✕</button></div>
+    <div class="modal-head"><div><h2 style="margin:0">New ward announcement</h2></div><button id="closeAnnouncementModal" class="icon-btn" aria-label="Close announcement">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button></div>
     <div class="modal-body">
       <form id="announcementForm">
         <div class="field"><label>Title</label><input id="announcementTitle" maxlength="120" required placeholder="e.g. Water interruption update"></div>
@@ -523,7 +821,8 @@
     channel:null,
     map:null,
     markers:[],
-    currentSection:"dashboardSection"
+    currentSection:"dashboardSection",
+    mapFilter:"all"
   };
 
   const $ = id => document.getElementById(id);
@@ -556,8 +855,20 @@
     $("logoutBtn").addEventListener("click",()=>sb.auth.signOut());
     $("refreshBtn").addEventListener("click",refreshAll);
     $("reportRefreshBtn").addEventListener("click",refreshAll);
-    $("mobileMenuBtn").addEventListener("click",()=>$("sidebar").classList.toggle("open"));
+    $("mobileMenuBtn").addEventListener("click",()=>{
+      $("sidebar").classList.toggle("open");
+      $("sidebarBackdrop").classList.toggle("hidden",!$("sidebar").classList.contains("open"));
+    });
+    $("sidebarBackdrop").addEventListener("click",()=>{
+      $("sidebar").classList.remove("open");
+      $("sidebarBackdrop").classList.add("hidden");
+    });
     $("fitMapBtn").addEventListener("click",fitMap);
+    $$("[data-map-filter]").forEach(btn=>btn.addEventListener("click",()=>{
+      state.mapFilter=btn.dataset.mapFilter;
+      $$("[data-map-filter]").forEach(x=>x.classList.toggle("active",x===btn));
+      renderMap();
+    }));
 
     $$("[data-section]").forEach(btn=>btn.addEventListener("click",()=>switchSection(btn.dataset.section,btn.dataset.title)));
     $$("[data-jump]").forEach(btn=>btn.addEventListener("click",()=>{
@@ -614,7 +925,7 @@
     $("appView").classList.remove("hidden");
 
     renderIdentity();
-    await refreshAll();
+    await refreshAll(true);
     setupRealtime();
   }
 
@@ -630,6 +941,22 @@
     $("profileName").value=name;
     $("profileEmail").value=state.user?.email||"";
     $("profileWard").value=`${wardLabel}${state.ward?.name ? " — "+state.ward.name : ""}`;
+
+    const municipality=state.ward?.municipalities?.name || "City of Mbombela";
+    const wardArea=state.ward?.name || "Assigned ward area";
+    $("profileAvatarBig").textContent=initials(name);
+    $("profileDisplayName").textContent=name;
+    $("profileDisplayWard").textContent=`${wardLabel} • ${municipality}`;
+    $("profileFactName").textContent=name;
+    $("profileFactEmail").textContent=state.user?.email||"—";
+    $("profileFactWard").textContent=wardLabel;
+    $("profileFactMunicipality").textContent=municipality;
+    $("profileFactArea").textContent=wardArea;
+    $("commandWardName").textContent=state.ward?.name ? `${wardLabel} — ${state.ward.name}` : wardLabel;
+    $("commandMunicipality").textContent=municipality;
+    $("commandCouncillorName").textContent=name;
+    $("commandCouncillorEmail").textContent=state.user?.email||"—";
+    $("mapWardBadge").textContent=wardLabel;
   }
 
   function switchSection(id,title){
@@ -638,26 +965,47 @@
     $$("[data-section]").forEach(b=>b.classList.toggle("active",b.dataset.section===id));
     $("topTitle").textContent=title||"Ward Portal";
     $("sidebar").classList.remove("open");
+    $("sidebarBackdrop").classList.add("hidden");
     if(id==="mapSection") setTimeout(renderMap,100);
     window.scrollTo({top:0,behavior:"smooth"});
   }
 
-  async function refreshAll(){
+  async function refreshAll(silent=false){
     await Promise.all([loadReports(),loadEscalations(),loadAnnouncements()]);
     renderAll();
-    toast("Ward data updated.");
+    if(!silent) toast("Ward data updated.");
   }
 
   async function loadReports(){
-    const {data,error}=await sb.from("reports").select(`
+    // First load the ward reports themselves. Do not let one missing/blocked
+    // relationship (images/history/categories) make the whole councillor list empty.
+    const {data:base,error:baseError}=await sb
+      .from("reports")
+      .select("*")
+      .eq("ward_id",state.ward.id)
+      .order("created_at",{ascending:false})
+      .limit(500);
+
+    if(baseError){
+      console.error("CM Civic councillor reports:",baseError);
+      state.reports=[];
+      toast("Could not load ward reports: "+baseError.message);
+      return;
+    }
+
+    state.reports=base||[];
+    if(!state.reports.length) return;
+
+    // Enrich reports when RLS/relationships allow it, but never hide base reports.
+    const {data:rich,error:richError}=await sb.from("reports").select(`
       *,
       issue_categories(name,slug),
       report_images(id,object_path,image_type),
       report_status_history(id,old_status,new_status,note,created_at)
     `).eq("ward_id",state.ward.id).order("created_at",{ascending:false}).limit(500);
 
-    if(error){toast(error.message);return}
-    state.reports=data||[];
+    if(!richError && rich?.length) state.reports=rich;
+    else if(richError) console.warn("CM Civic report enrichment unavailable:",richError);
   }
 
   async function loadEscalations(){
@@ -699,6 +1047,9 @@
     $("statCritical").textContent=critical.length;
     $("statResolved").textContent=resolved.length;
     $("statEscalated").textContent=escalated.length;
+    $("profileMetricReports").textContent=r.length;
+    $("profileMetricOpen").textContent=open.length;
+    $("profileMetricResolved").textContent=resolved.length;
 
     $("dashboardReportRows").innerHTML=r.slice(0,7).map(x=>`
       <tr>
@@ -888,19 +1239,81 @@
     await refreshAll();
   }
 
+  function mapRows(){
+    const valid=state.reports.filter(r=>{
+      const lat=Number(r.public_latitude), lng=Number(r.public_longitude);
+      return Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat)<=90 && Math.abs(lng)<=180;
+    });
+    if(state.mapFilter==="critical") return valid.filter(r=>r.priority==="critical" && !["resolved","community_confirmed"].includes(r.status));
+    if(state.mapFilter==="resolved") return valid.filter(r=>["resolved","community_confirmed"].includes(r.status));
+    if(state.mapFilter==="open") return valid.filter(r=>!["resolved","community_confirmed","invalid","duplicate"].includes(r.status));
+    return valid;
+  }
+
   function renderMap(){
-    if(typeof L==="undefined")return;
+    if(typeof L==="undefined") return;
+    const allValid=state.reports.filter(r=>{
+      const lat=Number(r.public_latitude),lng=Number(r.public_longitude);
+      return Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180;
+    });
+    const open=allValid.filter(r=>!["resolved","community_confirmed","invalid","duplicate"].includes(r.status));
+    const critical=allValid.filter(r=>r.priority==="critical"&&!["resolved","community_confirmed"].includes(r.status));
+    const resolved=allValid.filter(r=>["resolved","community_confirmed"].includes(r.status));
+
+    $("mapAllCount").textContent=allValid.length;
+    $("mapOpenCount").textContent=open.length;
+    $("mapCriticalCount").textContent=critical.length;
+    $("mapResolvedCount").textContent=resolved.length;
+
     if(!state.map){
-      state.map=L.map("wardMap").setView([-25.4753,30.9694],12);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors"}).addTo(state.map);
+      state.map=L.map("wardMap",{zoomControl:true}).setView([-25.4753,30.9694],12);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{
+        maxZoom:20,
+        attribution:'&copy; OpenStreetMap contributors &copy; CARTO'
+      }).addTo(state.map);
     }
-    state.markers.forEach(m=>m.remove());state.markers=[];
-    state.reports.filter(r=>Number.isFinite(r.public_latitude)&&Number.isFinite(r.public_longitude)).forEach(r=>{
-      const m=L.circleMarker([r.public_latitude,r.public_longitude],{radius:r.priority==="critical"?10:8,weight:2,fillOpacity:.75}).addTo(state.map);
-      m.bindPopup(`<div style="font-family:Manrope,sans-serif;min-width:200px"><strong>${esc(r.title)}</strong><div style="font-size:10px;margin-top:4px;color:#6c7971">${esc(r.reference_number||"")} • ${esc(nice(r.status))}</div></div>`);
+
+    state.markers.forEach(m=>m.remove());
+    state.markers=[];
+
+    const rows=mapRows();
+    $("mappedCount").textContent=`${rows.length} mapped`;
+    $("mapEmptyState").classList.toggle("hidden",allValid.length>0);
+
+    $("mappedReportList").innerHTML=rows.map(r=>`
+      <button class="mapped-report-item" data-map-open="${r.id}">
+        <strong>${esc(r.title||"Service report")}</strong>
+        <span>${esc(r.public_location_label||`Ward ${state.ward?.ward_number||""}`)}</span>
+        <div class="map-list-meta">
+          <em>${esc(nice(r.status))}</em>
+          <em>${esc(nice(r.priority||"normal"))}</em>
+          <em>${esc(r.reference_number||"Report")}</em>
+        </div>
+      </button>`).join("") || `<div class="empty"><strong>No reports in this map filter</strong>Choose another filter to view mapped issues.</div>`;
+
+    rows.forEach(r=>{
+      const lat=Number(r.public_latitude),lng=Number(r.public_longitude);
+      const type=["resolved","community_confirmed"].includes(r.status)?"resolved":r.priority==="critical"?"critical":"open";
+      const icon=L.divIcon({
+        className:"cm-map-marker",
+        html:`<div class="cm-map-pin ${type}"></div>`,
+        iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-27]
+      });
+      const m=L.marker([lat,lng],{icon}).addTo(state.map);
+      m.reportId=r.id;
+      m.bindPopup(`<div style="min-width:210px"><strong style="font-size:11px">${esc(r.title||"Service report")}</strong><div style="font-size:9px;color:#68766e;margin-top:5px">${esc(r.reference_number||"")} • ${esc(nice(r.status))}</div><div style="font-size:9px;color:#68766e;margin-top:3px">${esc(r.public_location_label||"Ward report")}</div></div>`);
       state.markers.push(m);
     });
-    setTimeout(()=>state.map.invalidateSize(),100);
+
+    $$("[data-map-open]").forEach(btn=>btn.onclick=()=>{
+      const marker=state.markers.find(m=>m.reportId===btn.dataset.mapOpen);
+      if(marker){state.map.setView(marker.getLatLng(),Math.max(state.map.getZoom(),15));marker.openPopup()}
+    });
+
+    setTimeout(()=>{
+      state.map.invalidateSize();
+      if(state.markers.length) fitMap();
+    },120);
   }
 
   function fitMap(){
